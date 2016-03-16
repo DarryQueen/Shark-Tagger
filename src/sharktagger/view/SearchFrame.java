@@ -102,4 +102,23 @@ public class SearchFrame extends JFrame {
 
         setupUI();
     }
+
+    public Query getQuery() {
+        String range = (String) jcbRange.getSelectedItem();
+        String gender = (String) jcbGender.getSelectedItem();
+        String stage = (String) jcbStage.getSelectedItem();
+        String location = (String) jcbLocation.getSelectedItem();
+        return new Query(range, gender, stage, location);
+    }
+
+    public static class Query {
+        public String range, gender, stage, location;
+
+        public Query(String r, String g, String s, String l) {
+            range = r;
+            gender = g;
+            stage = s;
+            location = l;
+        }
+    }
 }
