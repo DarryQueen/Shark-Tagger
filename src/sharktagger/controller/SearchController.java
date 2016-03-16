@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import api.jaws.Jaws;
-import sharktagger.model.Shark;
+import api.jaws.Shark;
 import sharktagger.model.UserPreference;
 import sharktagger.view.SearchFrame;
 
