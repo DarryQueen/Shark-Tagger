@@ -3,7 +3,12 @@ package sharktagger.controller;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -65,7 +70,25 @@ public class SearchController implements ActionListener {
             System.out.println("Unknown time range: " + query.range);
         }
 
+        // Sort pings, latest first.
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Collections.sort(pings, new Comparator<Ping>() {
+            @Override
+            public int compare(Ping p1, Ping p2) {
+                Date date1 = null, date2 = null;
+                try {
+                    date1 = formatter.parse(p1.getTime());
+                    date2 = formatter.parse(p2.getTime());
+                } catch (Exception e) {
+                    // I really don't care.
+                    e.printStackTrace();
+                }
+                return -1 * date1.compareTo(date2);
+            }
+        });
+
         // Filter.
+        HashSet<String> seenNames = new HashSet<String>();
         for (Ping ping : pings) {
             Shark shark = mJaws.getShark(ping.getName());
 
@@ -73,9 +96,11 @@ public class SearchController implements ActionListener {
             boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
             boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
             boolean locationMatch = query.location == SearchFrame.OPTION_ALL || query.location.equals(shark.getTagLocation());
+            boolean newShark = !seenNames.contains(shark.getName());
 
-            if (genderMatch && stageMatch && locationMatch) {
+            if (genderMatch && stageMatch && locationMatch && newShark) {
                 sharks.add(shark);
+                seenNames.add(shark.getName());
             }
         }
 
