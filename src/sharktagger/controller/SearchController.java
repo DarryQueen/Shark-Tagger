@@ -89,8 +89,16 @@ public class SearchController implements ActionListener {
         switch (component.getName()) {
         case SearchFrame.JBSEARCH_NAME:
             SearchFrame.Query query = mSearchFrame.getQuery();
-            // TODO: There is a large latency on the UI thread, so let's move this to another thread.
-            List<Shark> sharks = makeQuery(query);
+
+            // Do not interrupt UI while these queries are happening.
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    List<Shark> sharks = makeQuery(query);
+                }
+            };
+
+            new Thread(r).start();
             break;
         default:
             System.out.println("Unknown action source: " + component.getName());
