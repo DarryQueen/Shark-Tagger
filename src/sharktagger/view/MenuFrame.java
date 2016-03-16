@@ -19,9 +19,10 @@ public class MenuFrame extends JFrame {
     public static final String JBSEARCH_NAME = "sharktagger.view.MenuFrame.jbSearch";
     public static final String JBFAVORITES_NAME = "sharktagger.view.MenuFrame.jbFavorites";
 
-    public static final int WIDTH = 600;
-    public static final int HEIGHT = 400;
+    private static final int WIDTH = 600;
+    private static final int HEIGHT = 400;
 
+    /** Instance variables. */
     private JButton jbSearch;
     private JButton jbFavorites;
 

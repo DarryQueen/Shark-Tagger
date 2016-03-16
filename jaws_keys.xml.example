@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<keys>
+   <jaws>
+      <public>insert_public_key_here</public>
+      <private>insert_private_key_here</private>
+   </jaws>
+</keys>
