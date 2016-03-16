@@ -3,6 +3,7 @@ package sharktagger.view;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -15,6 +16,10 @@ public class SearchFrame extends JFrame {
 
     /** String constants. */
     public static final String TITLE = "Search";
+    public static final String JBSEARCH_TEXT = "Search";
+
+    /** Internal naming constants. */
+    public static final String JBSEARCH_NAME = "sharktagger.view.SearchFrame.jbSearch";
 
     /** Dropdown constants. */
     private static final String OPTION_ALL = "All";
@@ -44,16 +49,19 @@ public class SearchFrame extends JFrame {
     private JComboBox<String> jcbGender;
     private JComboBox<String> jcbStage;
     private JComboBox<String> jcbLocation;
+    private JButton jbSearch;
 
     private JTextPane jtpResults;
 
     private void setupUI() {
         // Left side query.
         JPanel queryPanel = new JPanel();
+
         queryPanel.add(jcbRange);
         queryPanel.add(jcbGender);
         queryPanel.add(jcbStage);
         queryPanel.add(jcbLocation);
+        queryPanel.add(jbSearch);
 
         // Right side search results.
         JPanel resultsPanel = new JPanel();
@@ -84,6 +92,11 @@ public class SearchFrame extends JFrame {
         jcbGender = new JComboBox<String>(GENDER_OPTIONS);
         jcbStage = new JComboBox<String>(STAGE_OPTIONS);
         jcbLocation = new JComboBox<String>(locations.toArray(locationsArray));
+        jbSearch = new JButton(JBSEARCH_TEXT);
+
+        // Set names and action listener.
+        jbSearch.setName(JBSEARCH_NAME);
+        jbSearch.addActionListener(listener);
 
         jtpResults = new JTextPane();
 
