@@ -16,7 +16,7 @@ public class Main {
 
         UserPreference preferences = UserPreference.retrieveFromFile(PREFERENCES_FILENAME);
 
-        SearchController sController = new SearchController(preferences);
+        SearchController sController = new SearchController(preferences, jaws);
         FavoritesController fController = new FavoritesController(preferences, sController);
         MenuController mController = new MenuController(preferences, sController, fController);
 
