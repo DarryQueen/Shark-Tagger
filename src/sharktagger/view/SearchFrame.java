@@ -3,13 +3,17 @@ package sharktagger.view;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextPane;
+
+import api.jaws.Ping;
+import api.jaws.Shark;
+import sharktagger.view.search.ResultPanel;
 
 public class SearchFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -38,9 +42,9 @@ public class SearchFrame extends JFrame {
     public static final String STAGE_UNDETERMINED = "Undetermined";
     private static final String[] STAGE_OPTIONS = {OPTION_ALL, STAGE_MATURE, STAGE_IMMATURE, STAGE_UNDETERMINED};
 
-    private static final int WIDTH = 1000;
-    private static final int HEIGHT = 1000;
-    private static final int DIVIDER_LOCATION = 300;
+    public static final int WIDTH = 1000;
+    public static final int HEIGHT = 1000;
+    public static final int DIVIDER_LOCATION = 300;
 
     /** Instance variables. */
     private ActionListener mActionListener;
@@ -51,7 +55,7 @@ public class SearchFrame extends JFrame {
     private JComboBox<String> jcbLocation;
     private JButton jbSearch;
 
-    private JTextPane jtpResults;
+    private JPanel jpResults;
 
     private void setupUI() {
         // Left side query.
@@ -64,9 +68,8 @@ public class SearchFrame extends JFrame {
         queryPanel.add(jbSearch);
 
         // Right side search results.
-        JPanel resultsPanel = new JPanel();
-        resultsPanel.add(jtpResults);
-        JScrollPane resultsScrollPane = new JScrollPane(resultsPanel);
+        jpResults.setLayout(new BoxLayout(jpResults, BoxLayout.PAGE_AXIS));
+        JScrollPane resultsScrollPane = new JScrollPane(jpResults, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // TODO: Setup the JTextPane.
 
@@ -75,6 +78,7 @@ public class SearchFrame extends JFrame {
         splitPane.setDividerLocation(DIVIDER_LOCATION);
         splitPane.setLeftComponent(queryPanel);
         splitPane.setRightComponent(resultsScrollPane);
+        splitPane.setEnabled(false);
 
         this.add(splitPane);
     }
@@ -98,9 +102,21 @@ public class SearchFrame extends JFrame {
         jbSearch.setName(JBSEARCH_NAME);
         jbSearch.addActionListener(listener);
 
-        jtpResults = new JTextPane();
+        jpResults = new JPanel();
 
         setupUI();
+    }
+
+    public void addResult(Shark shark, Ping ping) {
+        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), ping.getTime());
+        ResultPanel resultPanel = new ResultPanel(mActionListener, result);
+        jpResults.add(resultPanel);
+        repaint(); revalidate();
+    }
+
+    public void clearResults() {
+        jpResults.removeAll();
+        repaint(); revalidate();
     }
 
     public Query getQuery() {
