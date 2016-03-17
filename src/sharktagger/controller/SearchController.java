@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import api.jaws.Jaws;
 import api.jaws.Ping;
@@ -88,7 +89,7 @@ public class SearchController implements ActionListener {
         });
 
         // Filter.
-        HashSet<String> seenNames = new HashSet<String>();
+        Set<String> seenNames = new HashSet<String>();
         for (Ping ping : pings) {
             Shark shark = mJaws.getShark(ping.getName());
 
@@ -122,7 +123,7 @@ public class SearchController implements ActionListener {
                 @Override
                 public void run() {
                     mSearchFrame.clearResults();
-                    List<Shark> sharks = performQuery(query);
+                    performQuery(query);
                 }
             };
 
