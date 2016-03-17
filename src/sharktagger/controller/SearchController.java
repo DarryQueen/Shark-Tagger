@@ -50,7 +50,7 @@ public class SearchController implements ActionListener {
     public void open(Shark shark) {
     }
 
-    private List<Shark> makeQuery(SearchFrame.Query query) {
+    private List<Shark> performQuery(SearchFrame.Query query) {
         // Initialize an empty list.
         List<Shark> sharks = new LinkedList<Shark>();
         List<Ping> pings = new ArrayList<Ping>();
@@ -101,6 +101,8 @@ public class SearchController implements ActionListener {
             if (genderMatch && stageMatch && locationMatch && newShark) {
                 sharks.add(shark);
                 seenNames.add(shark.getName());
+
+                mSearchFrame.addResult(shark, ping);
             }
         }
 
@@ -119,7 +121,8 @@ public class SearchController implements ActionListener {
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
-                    List<Shark> sharks = makeQuery(query);
+                    mSearchFrame.clearResults();
+                    List<Shark> sharks = performQuery(query);
                 }
             };
 
