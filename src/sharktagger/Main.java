@@ -7,7 +7,7 @@ import sharktagger.controller.SearchController;
 import sharktagger.model.UserPreference;
 
 public class Main {
-    private static final String PREFERENCES_FILENAME = "";
+    public static final String PREFERENCES_FILENAME = "preferences.xml";
     private static final String JAWS_KEYS_FILENAME = "jaws_keys.xml";
 
     public static void main(String[] args) {

@@ -2,6 +2,7 @@ package sharktagger.view;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -33,10 +34,13 @@ public class MenuFrame extends JFrame {
         this.add(jbFavorites);
     }
 
-    public MenuFrame(ActionListener listener) {
+    public MenuFrame(ActionListener actionListener, WindowListener windowListener) {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+        // Set window listener.
+        this.addWindowListener(windowListener);
 
         jbSearch = new JButton(JBSEARCH_TEXT);
         jbFavorites = new JButton(JBFAVORITES_TEXT);
@@ -44,8 +48,8 @@ public class MenuFrame extends JFrame {
         // Set names and action listener.
         jbSearch.setName(JBSEARCH_NAME);
         jbFavorites.setName(JBFAVORITES_NAME);
-        jbSearch.addActionListener(listener);
-        jbFavorites.addActionListener(listener);
+        jbSearch.addActionListener(actionListener);
+        jbFavorites.addActionListener(actionListener);
 
         setupUI();
     }

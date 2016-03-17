@@ -3,15 +3,21 @@ package sharktagger.controller;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
+import sharktagger.Main;
 import sharktagger.model.UserPreference;
 import sharktagger.view.MenuFrame;
 
-public class MenuController implements ActionListener {
+public class MenuController implements ActionListener, WindowListener {
     /** SearchController instance for opening up search. */
     private SearchController mSearchController;
     /** FavoritesController instance for opening up favorites */
     private FavoritesController mFavoritesController;
+
+    /** UserPrference object. */
+    private UserPreference mUserPreference;
 
     /** MenuFrame instance representing the view. */
     MenuFrame mMenuFrame;
@@ -26,7 +32,9 @@ public class MenuController implements ActionListener {
         mSearchController = sController;
         mFavoritesController = fController;
 
-        mMenuFrame = new MenuFrame(this);
+        mUserPreference = pref;
+
+        mMenuFrame = new MenuFrame(this, this);
     }
 
     /**
@@ -51,4 +59,25 @@ public class MenuController implements ActionListener {
             System.out.println("Unknown action source: " + component.getName());
         }
     }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        mUserPreference.saveToFile(Main.PREFERENCES_FILENAME);
+    }
+
+    /**
+     * Ignore these WindowListener methods, because we don't use them.
+     */
+    @Override
+    public void windowOpened(WindowEvent e) {}
+    @Override
+    public void windowClosed(WindowEvent e) {}
+    @Override
+    public void windowIconified(WindowEvent e) {}
+    @Override
+    public void windowDeiconified(WindowEvent e) {}
+    @Override
+    public void windowActivated(WindowEvent e) {}
+    @Override
+    public void windowDeactivated(WindowEvent e) {}
 }
