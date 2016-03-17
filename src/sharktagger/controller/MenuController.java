@@ -48,7 +48,7 @@ public class MenuController implements ActionListener {
             mFavoritesController.open();
             break;
         default:
-            System.out.println("Unknown action source.");
+            System.out.println("Unknown action source: " + component.getName());
         }
     }
 }

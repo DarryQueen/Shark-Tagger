@@ -22,20 +22,20 @@ public class SearchFrame extends JFrame {
     public static final String JBSEARCH_NAME = "sharktagger.view.SearchFrame.jbSearch";
 
     /** Dropdown constants. */
-    private static final String OPTION_ALL = "All";
+    public static final String OPTION_ALL = "All";
 
-    private static final String RANGE_DAY = "Last 24 Hours";
-    private static final String RANGE_WEEK = "Last Week";
-    private static final String RANGE_MONTH = "Last Month";
+    public static final String RANGE_DAY = "Last 24 Hours";
+    public static final String RANGE_WEEK = "Last Week";
+    public static final String RANGE_MONTH = "Last Month";
     private static final String[] RANGE_OPTIONS = {RANGE_DAY, RANGE_WEEK, RANGE_MONTH};
 
-    private static final String GENDER_MALE = "Male";
-    private static final String GENDER_FEMALE = "Female";
+    public static final String GENDER_MALE = "Male";
+    public static final String GENDER_FEMALE = "Female";
     private static final String[] GENDER_OPTIONS = {OPTION_ALL, GENDER_MALE, GENDER_FEMALE};
 
-    private static final String STAGE_MATURE = "Mature";
-    private static final String STAGE_IMMATURE = "Immature";
-    private static final String STAGE_UNDETERMINED = "Undetermined";
+    public static final String STAGE_MATURE = "Mature";
+    public static final String STAGE_IMMATURE = "Immature";
+    public static final String STAGE_UNDETERMINED = "Undetermined";
     private static final String[] STAGE_OPTIONS = {OPTION_ALL, STAGE_MATURE, STAGE_IMMATURE, STAGE_UNDETERMINED};
 
     private static final int WIDTH = 1000;
@@ -101,5 +101,24 @@ public class SearchFrame extends JFrame {
         jtpResults = new JTextPane();
 
         setupUI();
+    }
+
+    public Query getQuery() {
+        String range = (String) jcbRange.getSelectedItem();
+        String gender = (String) jcbGender.getSelectedItem();
+        String stage = (String) jcbStage.getSelectedItem();
+        String location = (String) jcbLocation.getSelectedItem();
+        return new Query(range, gender, stage, location);
+    }
+
+    public static class Query {
+        public String range, gender, stage, location;
+
+        public Query(String r, String g, String s, String l) {
+            range = r;
+            gender = g;
+            stage = s;
+            location = l;
+        }
     }
 }

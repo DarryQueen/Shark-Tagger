@@ -2,6 +2,8 @@ package sharktagger.model;
 
 import java.util.Set;
 
+import api.jaws.Shark;
+
 public class UserPreference {
     private Set<Shark> favorites;
 
