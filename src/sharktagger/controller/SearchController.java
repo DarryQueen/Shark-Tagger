@@ -13,13 +13,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JButton;
+
 import api.jaws.Jaws;
 import api.jaws.Ping;
 import api.jaws.Shark;
 import sharktagger.model.UserPreference;
 import sharktagger.view.SearchFrame;
+import sharktagger.view.search.ResultPanel;
 
 public class SearchController implements ActionListener {
+    /** UserPrference object. */
+    private UserPreference mUserPreference;
+
     /** Jaws object. */
     private Jaws mJaws;
 
@@ -31,6 +37,8 @@ public class SearchController implements ActionListener {
      * @param pref UserPreference object.
      */
     public SearchController(UserPreference pref, Jaws jaws) {
+        mUserPreference = pref;
+
         mJaws = jaws;
         List<String> locations = jaws.getTagLocations();
 
@@ -103,7 +111,7 @@ public class SearchController implements ActionListener {
                 sharks.add(shark);
                 seenNames.add(shark.getName());
 
-                mSearchFrame.addResult(shark, ping);
+                mSearchFrame.addResult(shark, ping, mUserPreference.isFavorite(shark.getName()));
             }
         }
 
@@ -128,6 +136,15 @@ public class SearchController implements ActionListener {
             };
 
             new Thread(r).start();
+            break;
+        case ResultPanel.JBFOLLOW_NAME:
+            JButton jButton = (JButton) component;
+            ResultPanel resultPanel = (ResultPanel) jButton.getParent();
+            String sharkName = jButton.getActionCommand();
+
+            mUserPreference.toggleFavorite(sharkName);
+            resultPanel.toggleFollow();
+
             break;
         default:
             System.out.println("Unknown action source: " + component.getName());
