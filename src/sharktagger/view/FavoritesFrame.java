@@ -57,8 +57,14 @@ public class FavoritesFrame extends JFrame {
         setupUI();
     }
 
-    public void addFavorite(Shark shark) {
-        String sharkText = shark.getName() + ": ";
+    private String getSharkText(Shark shark, double distance) {
+        String sharkText = shark.getName() + ": " + distance + " km.";
+
+        return sharkText;
+    }
+
+    public void addFavorite(Shark shark, double distance) {
+        String sharkText = getSharkText(shark, distance);
         JButton jButton = new JButton(sharkText);
         jButton.setMargin(new Insets(0, 0, 0, 0));
         jButton.setContentAreaFilled(false);
