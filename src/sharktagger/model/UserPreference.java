@@ -61,7 +61,7 @@ public class UserPreference {
      * Load user preferences from specified file.
      * If file does not exist, instantiate a new preferences.
      * @param filename String name of the preferences file.
-     * @return UserPreference object, or null if unsuccessful.
+     * @return UserPreference object.
      */
     public static UserPreference retrieveFromFile(String filename) {
         UserPreference userPreference = new UserPreference();
@@ -74,13 +74,12 @@ public class UserPreference {
             document = db.parse(new File(filename));
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
-            return null;
+            return userPreference;
         } catch (SAXException e) {
             e.printStackTrace();
-            return null;
+            return userPreference;
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            return userPreference;
         }
 
         Element rootElement = document.getDocumentElement();
