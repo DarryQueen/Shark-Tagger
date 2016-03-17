@@ -71,8 +71,6 @@ public class SearchFrame extends JFrame {
         jpResults.setLayout(new BoxLayout(jpResults, BoxLayout.PAGE_AXIS));
         JScrollPane resultsScrollPane = new JScrollPane(jpResults, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // TODO: Setup the JTextPane.
-
         // JSplitPane.
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(DIVIDER_LOCATION);
