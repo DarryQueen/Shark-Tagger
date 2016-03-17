@@ -1,11 +1,16 @@
 package sharktagger.view;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 public class MenuFrame extends JFrame {
@@ -24,15 +29,34 @@ public class MenuFrame extends JFrame {
     private static final int HEIGHT = 400;
 
     /** Instance variables. */
+    private JLabel jlShark;
     private JButton jbSearch;
     private JButton jbFavorites;
 
-    private void setupUI() {
-        this.setLayout(new GridLayout(0, 1));
+private void setupUI() {
+    	
+    	this.setLayout(new BorderLayout());
+    	
+    	ImageIcon sharkIcon = new ImageIcon("shark.jpg");
+    	Image sharkImage = sharkIcon.getImage();
+    	Image scaledSharkImage = sharkImage.getScaledInstance(240, 240, Image.SCALE_SMOOTH);
+    	sharkIcon = new ImageIcon(scaledSharkImage);
+    	
+        jlShark = new JLabel(sharkIcon);
+        jlShark.setText("Shark Tracker");
+        jlShark.setHorizontalTextPosition(JLabel.CENTER);
+        jlShark.setVerticalTextPosition(JLabel.BOTTOM);    	
+        this.add(jlShark, BorderLayout.CENTER);
+    	
+    	JPanel jpMenu = new JPanel(); 
+    	jpMenu.setLayout(new GridLayout(0,1));
 
-        this.add(jbSearch);
-        this.add(jbFavorites);
+        jpMenu.add(jbSearch);
+        jpMenu.add(jbFavorites);
+        
+        this.add(jpMenu, BorderLayout.SOUTH);
     }
+
 
     public MenuFrame(ActionListener actionListener, WindowListener windowListener) {
         super(TITLE);
