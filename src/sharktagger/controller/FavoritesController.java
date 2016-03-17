@@ -8,6 +8,8 @@ import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -56,35 +58,32 @@ public class FavoritesController implements ActionListener, FocusListener {
         mFavoritesFrame.setVisible(true);
     }
 
-    private double getDistanceFromKings(Shark shark) {
-        Location location = mJaws.getLastLocation(shark.getName());
-        return calcDistance(KINGS_LOCATION, location);
-    }
-
     private void refreshFavorites() {
         mFavoritesFrame.clearFavorites();
 
         List<String> favorites = mUserPreference.getFavorites();
         List<Shark> sharks = new ArrayList<Shark>();
+        Dictionary<String, Double> distances = new Hashtable<String, Double>();
 
         for (String sharkName : favorites) {
             Shark shark = mJaws.getShark(sharkName);
             sharks.add(shark);
+            distances.put(sharkName, getDistanceFromKings(mJaws.getLastLocation(sharkName)));
         }
 
         // Sort the list by distance from King's.
         Collections.sort(sharks, new Comparator<Shark>() {
             @Override
             public int compare(Shark s1, Shark s2) {
-                double d1 = getDistanceFromKings(s1);
-                double d2 = getDistanceFromKings(s2);
+                double d1 = distances.get(s1.getName());
+                double d2 = distances.get(s2.getName());
 
                 return Double.compare(d1, d2);
             }
         });
 
         for (Shark shark : sharks) {
-            double distance = getDistanceFromKings(shark);
+            double distance = distances.get(shark.getName());
             mFavoritesFrame.addFavorite(shark, distance);
         }
     }
@@ -116,13 +115,17 @@ public class FavoritesController implements ActionListener, FocusListener {
         // Do nothing.
     }
 
+    private static double getDistanceFromKings(Location location) {
+        return calcDistance(KINGS_LOCATION, location);
+    }
+
     /**
      * Grab distance between two Location objects in kilometers.
      * @param l1 Location object.
      * @param l2 Location object.
      * @return Double distance in kilometers.
      */
-    public static double calcDistance(Location l1, Location l2) {
+    private static double calcDistance(Location l1, Location l2) {
         double lat1 = l1.getLatitude(), lng1 = l1.getLongitude();
         double lat2 = l2.getLatitude(), lng2 = l2.getLongitude();
 
