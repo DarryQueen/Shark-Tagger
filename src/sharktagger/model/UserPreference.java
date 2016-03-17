@@ -1,18 +1,37 @@
 package sharktagger.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
-import api.jaws.Shark;
-
 public class UserPreference {
-    private Set<Shark> favorites;
+    private Set<String> favorites;
+
+    public UserPreference() {
+        favorites = new HashSet<String>();
+    }
 
     /**
      * If shark is not in favorites, add it to favorites.
      * Else, remove it from favorites.
-     * @param shark Shark object to toggle.
+     * @param name String name of shark object to toggle.
+     * @return boolean true if the shark was added to favorites, false if shark was removed.
      */
-    public void toggleFavorite(Shark shark) {
+    public boolean toggleFavorite(String name) {
+        if (favorites.contains(name)) {
+            favorites.remove(name);
+        } else {
+            favorites.add(name);
+        }
+        return favorites.contains(name);
+    }
+
+    /**
+     * Returns true if the shark is followed, false otherwise;
+     * @param name String name of shark.
+     * @return boolean if shark is followed.
+     */
+    public boolean isFavorite(String name) {
+        return favorites.contains(name);
     }
 
     /**
@@ -22,8 +41,8 @@ public class UserPreference {
      * @return UserPreference object.
      */
     public static UserPreference retrieveFromFile(String filename) {
-        // Default return value.
-        return null;
+        // For now, let's not save anything.
+        return new UserPreference();
     }
 
     /**

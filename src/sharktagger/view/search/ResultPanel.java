@@ -15,7 +15,8 @@ public class ResultPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     /** String constants. */
-    public static final String JBFOLLOW_TEXT = "Follow";
+    public static final String JBFOLLOW_TEXT_FOLLOW = "Follow";
+    public static final String JBFOLLOW_TEXT_UNFOLLOW = "Followed";
 
     /** Internal naming constants. */
     public static final String JBFOLLOW_NAME = "sharktagger.view.SearchFrame.ResultPanel.jbFollow";
@@ -50,9 +51,10 @@ public class ResultPanel extends JPanel {
         jTextArea.setEditable(false);
         jTextArea.setBackground(new Color(0, 0, 0, 0));
 
-        JButton jButton = new JButton(JBFOLLOW_TEXT);
+        JButton jButton = new JButton(mResult.followed ? JBFOLLOW_TEXT_UNFOLLOW : JBFOLLOW_TEXT_FOLLOW);
         jButton.setName(JBFOLLOW_NAME);
         jButton.setActionCommand(mResult.name);
+        jButton.addActionListener(mActionListener);
 
         jTextArea.setAlignmentY(Component.BOTTOM_ALIGNMENT);
         jButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
@@ -72,12 +74,26 @@ public class ResultPanel extends JPanel {
         setupUI();
     }
 
+    public void toggleFollow() {
+        mResult.followed = !mResult.followed;
+
+        this.removeAll();
+        setupUI();
+        repaint(); revalidate();
+    }
+
+    /**
+     * Objects of this class are not tightly bound to the preference model.
+     * Therefore, values of the fields may no longer be consistent with actual values after objects are constructed.
+     */
     public static class Result {
         public String name, gender, stage, species, length, weight;
         public String description;
         public String lastPing;
 
-        public Result(String n, String g, String st, String sp, String l, String w, String d, String p) {
+        public boolean followed;
+
+        public Result(String n, String g, String st, String sp, String l, String w, String d, String p, boolean f) {
             name = n;
             gender = g;
             stage = st;
@@ -86,6 +102,8 @@ public class ResultPanel extends JPanel {
             weight = w;
             description = d;
             lastPing = p;
+
+            followed = f;
         }
     }
 }

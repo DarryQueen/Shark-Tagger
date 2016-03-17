@@ -107,8 +107,8 @@ public class SearchFrame extends JFrame {
         setupUI();
     }
 
-    public void addResult(Shark shark, Ping ping) {
-        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), ping.getTime());
+    public void addResult(Shark shark, Ping ping, boolean followed) {
+        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), ping.getTime(), followed);
         ResultPanel resultPanel = new ResultPanel(mActionListener, result);
         jpResults.add(resultPanel);
         repaint(); revalidate();
