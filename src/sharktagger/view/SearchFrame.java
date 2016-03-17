@@ -71,8 +71,6 @@ public class SearchFrame extends JFrame {
         jpResults.setLayout(new BoxLayout(jpResults, BoxLayout.PAGE_AXIS));
         JScrollPane resultsScrollPane = new JScrollPane(jpResults, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        // TODO: Setup the JTextPane.
-
         // JSplitPane.
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(DIVIDER_LOCATION);
@@ -108,7 +106,8 @@ public class SearchFrame extends JFrame {
     }
 
     public void addResult(Shark shark, Ping ping, boolean followed) {
-        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), ping.getTime(), followed);
+        String lastPing = ping != null ? ping.getTime() : "Unknown";
+        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), lastPing, followed);
         ResultPanel resultPanel = new ResultPanel(mActionListener, result);
         jpResults.add(resultPanel);
         repaint(); revalidate();

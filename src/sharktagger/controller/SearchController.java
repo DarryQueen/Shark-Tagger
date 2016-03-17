@@ -54,9 +54,15 @@ public class SearchController implements ActionListener {
 
     /**
      * Open the search frame and load the results with the given shark.
-     * @param shark Shark to display in the results.
+     * @param sharkName String name of shark to display in result.
      */
-    public void open(Shark shark) {
+    public void open(String sharkName) {
+        Shark shark = mJaws.getShark(sharkName);
+
+        mSearchFrame.clearResults();
+        mSearchFrame.addResult(shark, null, mUserPreference.isFavorite(sharkName));
+
+        open();
     }
 
     private List<Shark> performQuery(SearchFrame.Query query) {

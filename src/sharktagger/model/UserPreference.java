@@ -1,6 +1,8 @@
 package sharktagger.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class UserPreference {
@@ -8,6 +10,10 @@ public class UserPreference {
 
     public UserPreference() {
         favorites = new HashSet<String>();
+    }
+
+    public List<String> getFavorites() {
+        return new ArrayList<String>(favorites);
     }
 
     /**
