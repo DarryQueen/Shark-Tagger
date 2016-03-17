@@ -13,6 +13,7 @@ import javax.swing.JSplitPane;
 
 import api.jaws.Ping;
 import api.jaws.Shark;
+import sharktagger.view.search.ResultPanel;
 
 public class SearchFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -107,9 +108,15 @@ public class SearchFrame extends JFrame {
     }
 
     public void addResult(Shark shark, Ping ping) {
+        ResultPanel.Result result = new ResultPanel.Result(shark.getName(), shark.getGender(), shark.getStageOfLife(), shark.getSpecies(), shark.getLength(), shark.getWeight(), shark.getDescription(), ping.getTime());
+        ResultPanel resultPanel = new ResultPanel(mActionListener, result);
+        jpResults.add(resultPanel);
+        repaint(); revalidate();
     }
 
     public void clearResults() {
+        jpResults.removeAll();
+        repaint(); revalidate();
     }
 
     public Query getQuery() {
