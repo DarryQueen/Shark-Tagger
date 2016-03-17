@@ -1,6 +1,7 @@
 package sharktagger.model;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,8 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class UserPreference {
     private Set<String> favorites;
@@ -58,11 +61,40 @@ public class UserPreference {
      * Load user preferences from specified file.
      * If file does not exist, instantiate a new preferences.
      * @param filename String name of the preferences file.
-     * @return UserPreference object.
+     * @return UserPreference object, or null if unsuccessful.
      */
     public static UserPreference retrieveFromFile(String filename) {
-        // For now, let's not save anything.
-        return new UserPreference();
+        UserPreference userPreference = new UserPreference();
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db;
+        Document document;
+        try {
+            db = dbf.newDocumentBuilder();
+            document = db.parse(new File(filename));
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            return null;
+        } catch (SAXException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        Element rootElement = document.getDocumentElement();
+        Element favoritesElement = (Element) rootElement.getElementsByTagName("favorites").item(0);
+        NodeList favoritesList = favoritesElement.getElementsByTagName("shark");
+
+        for (int i = 0; i < favoritesList.getLength(); i++) {
+            Element sharkElement = (Element) favoritesList.item(i);
+            String sharkName = sharkElement.getTextContent();
+
+            userPreference.toggleFavorite(sharkName);
+        }
+
+        return userPreference;
     }
 
     /**
