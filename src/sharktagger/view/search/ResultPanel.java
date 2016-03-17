@@ -44,7 +44,7 @@ public class ResultPanel extends JPanel {
 
     private void setupUI() {
         this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
-        this.setBorder(BorderFactory.createLineBorder(Color.gray));
+        this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
         JTextArea jTextArea = new JTextArea(getResultText());
         jTextArea.setLineWrap(true);
