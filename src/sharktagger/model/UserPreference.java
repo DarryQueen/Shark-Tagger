@@ -24,13 +24,19 @@ import org.xml.sax.SAXException;
 
 public class UserPreference {
     private Set<String> favorites;
+    private Set<PreferenceUpdateListener> updateListeners;
 
     public UserPreference() {
         favorites = new HashSet<String>();
+        updateListeners = new HashSet<PreferenceUpdateListener>();
     }
 
     public List<String> getFavorites() {
         return new ArrayList<String>(favorites);
+    }
+
+    public void addUpdateListener(PreferenceUpdateListener listener) {
+        updateListeners.add(listener);
     }
 
     /**
@@ -42,8 +48,18 @@ public class UserPreference {
     public boolean toggleFavorite(String name) {
         if (favorites.contains(name)) {
             favorites.remove(name);
+
+            // Update favorites.
+            for (PreferenceUpdateListener listener : updateListeners) {
+                listener.favoriteRemoved(name);
+            }
         } else {
             favorites.add(name);
+
+            // Update favorites.
+            for (PreferenceUpdateListener listener : updateListeners) {
+                listener.favoriteAdded(name);
+            }
         }
         return favorites.contains(name);
     }
@@ -141,5 +157,10 @@ public class UserPreference {
         }
 
         return true;
+    }
+
+    public static interface PreferenceUpdateListener {
+        public void favoriteAdded(String name);
+        public void favoriteRemoved(String name);
     }
 }
