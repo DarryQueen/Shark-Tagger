@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -47,6 +48,25 @@ public class UserPreference {
 
     public List<String> getFavorites() {
         return new ArrayList<String>(mFavorites);
+    }
+
+    public Date getLastUpdated() {
+        return mLastUpdated;
+    }
+
+    public Date refreshLastUpdated() {
+        Calendar c = Calendar.getInstance();
+        c.setTime(mLastUpdated);
+        Date currentDate = new Date();
+
+        // While we're less, keep adding a day.
+        while (c.getTime().compareTo(currentDate) < 0) {
+            c.add(Calendar.DATE, 1);
+        }
+
+        c.add(Calendar.DATE, -1);
+        mLastUpdated = c.getTime();
+        return mLastUpdated;
     }
 
     public void addUpdateListener(PreferenceUpdateListener listener) {
@@ -134,6 +154,7 @@ public class UserPreference {
         } else {
             System.out.println("last_updated field not found. Creating a new one.");
         }
+        userPreference.refreshLastUpdated();
 
         Element favoritesElement = (Element) rootElement.getElementsByTagName(FAVORITES_ELEMENT_NAME).item(0);
         if (favoritesElement != null) {
