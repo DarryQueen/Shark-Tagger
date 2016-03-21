@@ -123,22 +123,30 @@ public class UserPreference {
         Element rootElement = document.getDocumentElement();
 
         Element timeUpdatedElement = (Element) rootElement.getElementsByTagName(LAST_UPDATED_ELEMENT_NAME).item(0);
-        String timeUpdated = timeUpdatedElement.getTextContent();
-        try {
-            userPreference.mLastUpdated = DATE_FORMATTER.parse(timeUpdated);
-        } catch (ParseException e) {
-            System.out.println("Preference file corrupted. Erase and try again.");
-            System.exit(-1);
+        if (timeUpdatedElement != null) {
+            String timeUpdated = timeUpdatedElement.getTextContent();
+            try {
+                userPreference.mLastUpdated = DATE_FORMATTER.parse(timeUpdated);
+            } catch (ParseException e) {
+                System.out.println("Preference file corrupted. Erase and try again.");
+                System.exit(-1);
+            }
+        } else {
+            System.out.println("last_updated field not found. Creating a new one.");
         }
 
         Element favoritesElement = (Element) rootElement.getElementsByTagName(FAVORITES_ELEMENT_NAME).item(0);
-        NodeList favoritesList = favoritesElement.getElementsByTagName(FAVORITE_SHARK_ELEMENT_NAME);
+        if (favoritesElement != null) {
+            NodeList favoritesList = favoritesElement.getElementsByTagName(FAVORITE_SHARK_ELEMENT_NAME);
 
-        for (int i = 0; i < favoritesList.getLength(); i++) {
-            Element sharkElement = (Element) favoritesList.item(i);
-            String sharkName = sharkElement.getTextContent();
+            for (int i = 0; i < favoritesList.getLength(); i++) {
+                Element sharkElement = (Element) favoritesList.item(i);
+                String sharkName = sharkElement.getTextContent();
 
-            userPreference.mFavorites.add(sharkName);
+                userPreference.mFavorites.add(sharkName);
+            }
+        } else {
+            System.out.println("favorites field not found. Creating a new one.");
         }
 
         return userPreference;
