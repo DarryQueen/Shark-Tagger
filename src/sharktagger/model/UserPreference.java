@@ -23,6 +23,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class UserPreference {
+    private static final String ROOT_ELEMENT_NAME = "preferences";
+    private static final String FAVORITES_ELEMENT_NAME = "favorites";
+    private static final String FAVORITE_SHARK_ELEMENT_NAME = "shark";
+
     private Set<String> mFavorites;
     private Set<PreferenceUpdateListener> mUpdateListeners;
 
@@ -107,8 +111,8 @@ public class UserPreference {
         }
 
         Element rootElement = document.getDocumentElement();
-        Element favoritesElement = (Element) rootElement.getElementsByTagName("favorites").item(0);
-        NodeList favoritesList = favoritesElement.getElementsByTagName("shark");
+        Element favoritesElement = (Element) rootElement.getElementsByTagName(FAVORITES_ELEMENT_NAME).item(0);
+        NodeList favoritesList = favoritesElement.getElementsByTagName(FAVORITE_SHARK_ELEMENT_NAME);
 
         for (int i = 0; i < favoritesList.getLength(); i++) {
             Element sharkElement = (Element) favoritesList.item(i);
@@ -136,14 +140,14 @@ public class UserPreference {
         }
         Document document = db.newDocument();
 
-        Element rootElement = document.createElement("preferences");
+        Element rootElement = document.createElement(ROOT_ELEMENT_NAME);
         document.appendChild(rootElement);
 
-        Element favoritesElement = document.createElement("favorites");
+        Element favoritesElement = document.createElement(FAVORITES_ELEMENT_NAME);
         rootElement.appendChild(favoritesElement);
 
         for (String sharkName : mFavorites) {
-            Element sharkElement = document.createElement("shark");
+            Element sharkElement = document.createElement(FAVORITE_SHARK_ELEMENT_NAME);
             sharkElement.appendChild(document.createTextNode(sharkName));
             favoritesElement.appendChild(sharkElement);
         }
