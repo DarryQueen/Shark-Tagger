@@ -8,6 +8,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.border.Border;
 
 public class ResultPanel extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -47,7 +48,10 @@ public class ResultPanel extends JPanel {
 
     private void setupUI() {
         this.setLayout(new BorderLayout(0, 20));
-        this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        Border outline = BorderFactory.createLineBorder(Color.GRAY);
+        Border margin = BorderFactory.createEmptyBorder(8, 8, 8, 8);
+        this.setBorder(BorderFactory.createCompoundBorder(outline, margin));
 
         JTextArea jtaSpecs = new JTextArea(getSpecText());
         jtaSpecs.setEditable(false);
