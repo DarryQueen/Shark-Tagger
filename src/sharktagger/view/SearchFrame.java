@@ -2,7 +2,6 @@ package sharktagger.view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.event.ActionListener;
@@ -23,7 +22,6 @@ import javax.swing.SwingConstants;
 
 import api.jaws.Ping;
 import api.jaws.Shark;
-import sharktagger.controller.SearchController;
 import sharktagger.view.search.ResultPanel;
 
 public class SearchFrame extends JFrame {
@@ -32,6 +30,8 @@ public class SearchFrame extends JFrame {
     /** String constants. */
     public static final String TITLE = "Search";
     public static final String JBSEARCH_TEXT = "Search";
+
+    public static final String DROPDOWN_TITLE = "Shark Tracker";
     public static final String RANGE_DROPDOWN_TITLE = "Tracking Range";
     public static final String GENDER_DROPDOWN_TITLE = "Gender";
     public static final String STAGE_DROPDOWN_TITLE = "Stage of Life";
@@ -68,22 +68,14 @@ public class SearchFrame extends JFrame {
     private JComboBox<String> jcbGender;
     private JComboBox<String> jcbStage;
     private JComboBox<String> jcbLocation;
-    private JLabel jlRange;
-    private JLabel jlGender;
-    private JLabel jlStage;
-    private JLabel jlLocation;
     private JButton jbSearch;
 
-    private JLabel jlShark;
-    private JLabel jlSharkTracker;
-    private JLabel jlAcknowledgement;
-
     private JPanel jpResults;
-    private JPanel contentPane;
+
+    private String mAcknowledgement;
 
     private void setupUI() {
-        contentPane = (JPanel) this.getContentPane();
-        contentPane.setLayout(new BorderLayout());
+        this.setLayout(new BorderLayout());
 
         // Left side query.
         JPanel optionsPanel = new JPanel();
@@ -92,13 +84,13 @@ public class SearchFrame extends JFrame {
         JPanel queryPanel = new JPanel();
         queryPanel.setLayout(new GridLayout(0, 1));
 
-        jlSharkTracker = new JLabel(MenuFrame.LOGO_TITLE);
-        jlRange = new JLabel(RANGE_DROPDOWN_TITLE);
-        jlGender = new JLabel(GENDER_DROPDOWN_TITLE);
-        jlStage = new JLabel(STAGE_DROPDOWN_TITLE);
-        jlLocation = new JLabel(LOCATION_DROPDOWN_TITLE);
+        JLabel jlDropdown = new JLabel(DROPDOWN_TITLE);
+        JLabel jlRange = new JLabel(RANGE_DROPDOWN_TITLE);
+        JLabel jlGender = new JLabel(GENDER_DROPDOWN_TITLE);
+        JLabel jlStage = new JLabel(STAGE_DROPDOWN_TITLE);
+        JLabel jlLocation = new JLabel(LOCATION_DROPDOWN_TITLE);
 
-        queryPanel.add(jlSharkTracker);
+        queryPanel.add(jlDropdown);
         queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         queryPanel.add(jlRange);
         queryPanel.add(jcbRange);
@@ -122,12 +114,7 @@ public class SearchFrame extends JFrame {
         Image scaledSharkImage = sharkImage.getScaledInstance(240, 240, Image.SCALE_SMOOTH);
         sharkIcon = new ImageIcon(scaledSharkImage);
 
-        jlShark = new JLabel(sharkIcon);
-        jlShark.setText(MenuFrame.LOGO_TITLE);
-        jlShark.setFont(new Font(MenuFrame.LOGO_FONT, Font.BOLD, 32));
-        jlShark.setHorizontalTextPosition(JLabel.CENTER);
-        jlShark.setVerticalTextPosition(JLabel.BOTTOM);
-
+        JLabel jlShark = new JLabel(sharkIcon);
         optionsPanel.add(jlShark, BorderLayout.SOUTH);
 
         // Right side search results.
@@ -143,17 +130,17 @@ public class SearchFrame extends JFrame {
         splitPane.setEnabled(false);
         splitPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
-        contentPane.add(splitPane, BorderLayout.CENTER);
+        this.add(splitPane, BorderLayout.CENTER);
 
         // Acknowledgement.
-        jlAcknowledgement = new JLabel(((SearchController) mActionListener).getMJaws().getAcknowledgement());
+        JLabel jlAcknowledgement = new JLabel(mAcknowledgement);
         jlAcknowledgement.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         this.add(jlAcknowledgement, BorderLayout.SOUTH);
 
-        contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
     }
 
-    public SearchFrame(ActionListener listener, List<String> locations) {
+    public SearchFrame(ActionListener listener, List<String> locations, String acknowledgement) {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
 
@@ -161,6 +148,7 @@ public class SearchFrame extends JFrame {
         String[] locationsArray = new String[locations.size()];
 
         mActionListener = listener;
+        mAcknowledgement = acknowledgement;
 
         jcbRange = new JComboBox<String>(RANGE_OPTIONS);
         jcbGender = new JComboBox<String>(GENDER_OPTIONS);
