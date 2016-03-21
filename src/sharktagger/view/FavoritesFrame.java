@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -20,6 +19,7 @@ public class FavoritesFrame extends JFrame {
     /** String constants. */
     public static final String TITLE = "Favorites";
     public static final String HEADER_TEXT = "Your favourite sharks are this far away from you right now:";
+    public static final String UPDATING_TEXT = "Updating favourites...";
 
     /** Internal naming constants. */
     public static final String JBSHARK_NAME = "sharktagger.view.FavoritesFrame.jbShark";
@@ -44,15 +44,13 @@ public class FavoritesFrame extends JFrame {
         this.add(jpFavorites, BorderLayout.CENTER);
     }
 
-    public FavoritesFrame(ActionListener actionListener, FocusListener focusListener) {
+    public FavoritesFrame(ActionListener actionListener) {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
 
         mActionListener = actionListener;
 
         jpFavorites = new JPanel();
-
-        this.addFocusListener(focusListener);
 
         setupUI();
     }
@@ -81,6 +79,15 @@ public class FavoritesFrame extends JFrame {
 
     public void clearFavorites() {
         jpFavorites.removeAll();
+        repaint(); revalidate();
+    }
+
+    public void setUpdating() {
+        jpFavorites.removeAll();
+
+        JLabel jlUpdating = new JLabel(UPDATING_TEXT);
+        jpFavorites.add(jlUpdating);
+
         repaint(); revalidate();
     }
 }

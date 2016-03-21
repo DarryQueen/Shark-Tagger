@@ -3,14 +3,13 @@ package sharktagger.controller;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.JButton;
 
@@ -20,7 +19,7 @@ import api.jaws.Shark;
 import sharktagger.model.UserPreference;
 import sharktagger.view.FavoritesFrame;
 
-public class FavoritesController implements ActionListener, FocusListener {
+public class FavoritesController implements ActionListener, UserPreference.PreferenceUpdateListener {
     public static final Location KINGS_LOCATION = new Location(51.5119, 0.1161);
 
     /** SearchController instance to keep when opening up favorite shark. */
@@ -35,6 +34,9 @@ public class FavoritesController implements ActionListener, FocusListener {
     /** FavoritesFrame instance representing the view. */
     private FavoritesFrame mFavoritesFrame;
 
+    /** Refresh atomicity. */
+    private Semaphore mRefreshSemaphore;
+
     /**
      * Standard constructor.
      * @param pref UserPreference object.
@@ -47,45 +49,64 @@ public class FavoritesController implements ActionListener, FocusListener {
 
         mJaws = jaws;
 
-        mFavoritesFrame = new FavoritesFrame(this, this);
+        mFavoritesFrame = new FavoritesFrame(this);
+
+        mRefreshSemaphore = new Semaphore(1);
+
+        // Refresh the favorites panel.
+        refreshFavorites();
     }
 
     /**
      * Open the favorites frame.
      */
     public void open() {
-        refreshFavorites();
         mFavoritesFrame.setVisible(true);
     }
 
-    private void refreshFavorites() {
-        mFavoritesFrame.clearFavorites();
-
-        List<String> favorites = mUserPreference.getFavorites();
-        List<Shark> sharks = new ArrayList<Shark>();
-        Dictionary<String, Double> distances = new Hashtable<String, Double>();
-
-        for (String sharkName : favorites) {
-            Shark shark = mJaws.getShark(sharkName);
-            sharks.add(shark);
-            distances.put(sharkName, getDistanceFromKings(mJaws.getLastLocation(sharkName)));
-        }
-
-        // Sort the list by distance from King's.
-        Collections.sort(sharks, new Comparator<Shark>() {
-            @Override
-            public int compare(Shark s1, Shark s2) {
-                double d1 = distances.get(s1.getName());
-                double d2 = distances.get(s2.getName());
-
-                return Double.compare(d1, d2);
+    private Runnable mRefreshRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                mRefreshSemaphore.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        });
 
-        for (Shark shark : sharks) {
-            double distance = distances.get(shark.getName());
-            mFavoritesFrame.addFavorite(shark, distance);
+            mFavoritesFrame.setUpdating();
+
+            List<String> favorites = mUserPreference.getFavorites();
+            List<Shark> sharks = new ArrayList<Shark>();
+            Dictionary<String, Double> distances = new Hashtable<String, Double>();
+
+            for (String sharkName : favorites) {
+                Shark shark = mJaws.getShark(sharkName);
+                sharks.add(shark);
+                distances.put(sharkName, getDistanceFromKings(mJaws.getLastLocation(sharkName)));
+            }
+
+            // Sort the list by distance from King's.
+            Collections.sort(sharks, new Comparator<Shark>() {
+                @Override
+                public int compare(Shark s1, Shark s2) {
+                    double d1 = distances.get(s1.getName());
+                    double d2 = distances.get(s2.getName());
+
+                    return Double.compare(d1, d2);
+                }
+            });
+
+            mFavoritesFrame.clearFavorites();
+            for (Shark shark : sharks) {
+                double distance = distances.get(shark.getName());
+                mFavoritesFrame.addFavorite(shark, distance);
+            }
+
+            mRefreshSemaphore.release();
         }
+    };
+    private void refreshFavorites() {
+        new Thread(mRefreshRunnable).start();
     }
 
     @Override
@@ -103,16 +124,6 @@ public class FavoritesController implements ActionListener, FocusListener {
         default:
             System.out.println("Unknown action source: " + component.getName());
         }
-    }
-
-    @Override
-    public void focusGained(FocusEvent e) {
-        refreshFavorites();
-    }
-
-    @Override
-    public void focusLost(FocusEvent e) {
-        // Do nothing.
     }
 
     private static double getDistanceFromKings(Location location) {
@@ -137,5 +148,14 @@ public class FavoritesController implements ActionListener, FocusListener {
         double dist = earthRadius  * c;
 
         return dist;
+    }
+
+    @Override
+    public void favoriteAdded(String name) {
+        refreshFavorites();
+    }
+    @Override
+    public void favoriteRemoved(String name) {
+        refreshFavorites();
     }
 }

@@ -20,6 +20,8 @@ public class Main {
         FavoritesController fController = new FavoritesController(preferences, sController, jaws);
         MenuController mController = new MenuController(preferences, sController, fController);
 
+        preferences.addUpdateListener(fController);
+
         mController.open();
     }
 }
