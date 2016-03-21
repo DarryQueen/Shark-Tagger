@@ -84,4 +84,8 @@ public class MenuFrame extends JFrame {
 
         setupUI();
     }
+
+    public void setFavoritesButtonEnabled(boolean enable) {
+        jbFavorites.setEnabled(enable);
+    }
 }

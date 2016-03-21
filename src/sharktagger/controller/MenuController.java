@@ -10,7 +10,7 @@ import sharktagger.Main;
 import sharktagger.model.UserPreference;
 import sharktagger.view.MenuFrame;
 
-public class MenuController implements ActionListener, WindowListener {
+public class MenuController implements ActionListener, WindowListener, UserPreference.PreferenceUpdateListener {
     /** SearchController instance for opening up search. */
     private SearchController mSearchController;
     /** FavoritesController instance for opening up favorites */
@@ -35,6 +35,7 @@ public class MenuController implements ActionListener, WindowListener {
         mUserPreference = pref;
 
         mMenuFrame = new MenuFrame(this, this);
+        mMenuFrame.setFavoritesButtonEnabled(mUserPreference.hasFavorites());
     }
 
     /**
@@ -63,6 +64,15 @@ public class MenuController implements ActionListener, WindowListener {
     @Override
     public void windowClosing(WindowEvent e) {
         mUserPreference.saveToFile(Main.PREFERENCES_FILENAME);
+    }
+
+    @Override
+    public void favoriteAdded(String name) {
+        mMenuFrame.setFavoritesButtonEnabled(true);
+    }
+    @Override
+    public void favoriteRemoved(String name) {
+        mMenuFrame.setFavoritesButtonEnabled(mUserPreference.hasFavorites());
     }
 
     /**

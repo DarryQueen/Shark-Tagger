@@ -23,14 +23,20 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class UserPreference {
-    private Set<String> favorites;
+    private Set<String> mFavorites;
+    private Set<PreferenceUpdateListener> mUpdateListeners;
 
     public UserPreference() {
-        favorites = new HashSet<String>();
+        mFavorites = new HashSet<String>();
+        mUpdateListeners = new HashSet<PreferenceUpdateListener>();
     }
 
     public List<String> getFavorites() {
-        return new ArrayList<String>(favorites);
+        return new ArrayList<String>(mFavorites);
+    }
+
+    public void addUpdateListener(PreferenceUpdateListener listener) {
+        mUpdateListeners.add(listener);
     }
 
     /**
@@ -40,21 +46,39 @@ public class UserPreference {
      * @return boolean true if the shark was added to favorites, false if shark was removed.
      */
     public boolean toggleFavorite(String name) {
-        if (favorites.contains(name)) {
-            favorites.remove(name);
+        if (mFavorites.contains(name)) {
+            mFavorites.remove(name);
+
+            // Update favorites.
+            for (PreferenceUpdateListener listener : mUpdateListeners) {
+                listener.favoriteRemoved(name);
+            }
         } else {
-            favorites.add(name);
+            mFavorites.add(name);
+
+            // Update favorites.
+            for (PreferenceUpdateListener listener : mUpdateListeners) {
+                listener.favoriteAdded(name);
+            }
         }
-        return favorites.contains(name);
+        return mFavorites.contains(name);
     }
 
     /**
-     * Returns true if the shark is followed, false otherwise;
+     * Returns true if the shark is followed, false otherwise.
      * @param name String name of shark.
      * @return boolean if shark is followed.
      */
     public boolean isFavorite(String name) {
-        return favorites.contains(name);
+        return mFavorites.contains(name);
+    }
+
+    /**
+     * Returns true if any sharks are favorited, false otherwise.
+     * @return boolean true if any sharks are favorited, false otherwise.
+     */
+    public boolean hasFavorites() {
+        return !mFavorites.isEmpty();
     }
 
     /**
@@ -118,7 +142,7 @@ public class UserPreference {
         Element favoritesElement = document.createElement("favorites");
         rootElement.appendChild(favoritesElement);
 
-        for (String sharkName : favorites) {
+        for (String sharkName : mFavorites) {
             Element sharkElement = document.createElement("shark");
             sharkElement.appendChild(document.createTextNode(sharkName));
             favoritesElement.appendChild(sharkElement);
@@ -141,5 +165,10 @@ public class UserPreference {
         }
 
         return true;
+    }
+
+    public static interface PreferenceUpdateListener {
+        public void favoriteAdded(String name);
+        public void favoriteRemoved(String name);
     }
 }
