@@ -146,7 +146,7 @@ public class SearchController implements ActionListener {
             break;
         case ResultPanel.JBFOLLOW_NAME:
             JButton jButton = (JButton) component;
-            ResultPanel resultPanel = (ResultPanel) jButton.getParent();
+            ResultPanel resultPanel = (ResultPanel) jButton.getParent().getParent();
             String sharkName = jButton.getActionCommand();
 
             mUserPreference.toggleFavorite(sharkName);
