@@ -1,12 +1,10 @@
 package sharktagger.view.search;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -26,7 +24,7 @@ public class ResultPanel extends JPanel {
 
     private Result mResult;
 
-    private String getResultText() {
+    private String getSpecText() {
         String text = "";
 
         text += "Name:\t\t\t\t" + mResult.name + "\n";
@@ -36,32 +34,47 @@ public class ResultPanel extends JPanel {
         text += "Length:\t\t\t\t" + mResult.length + "\n";
         text += "Weight:\t\t\t\t" + mResult.weight + "\n";
 
-        text += "\nDescription:\n\n" + mResult.description + "\n";
-        text += "\nLast ping: " + mResult.lastPing;
+        return text.trim();
+    }
 
-        return text;
+    private String getDescriptionText() {
+        return "Description:\n\n" + mResult.description;
+    }
+
+    private String getPingText() {
+        return "Last Ping: " + mResult.lastPing;
     }
 
     private void setupUI() {
-        this.setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        this.setLayout(new BorderLayout(0, 20));
         this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        JTextArea jTextArea = new JTextArea(getResultText());
-        jTextArea.setLineWrap(true);
-        jTextArea.setEditable(false);
-        jTextArea.setBackground(new Color(0, 0, 0, 0));
+        JTextArea jtaSpecs = new JTextArea(getSpecText());
+        jtaSpecs.setEditable(false);
+        jtaSpecs.setBackground(new Color(0, 0, 0, 0));
+
+        JTextArea jtaDescription = new JTextArea(getDescriptionText());
+        jtaDescription.setLineWrap(true);
+        jtaDescription.setEditable(false);
+        jtaDescription.setBackground(new Color(0, 0, 0, 0));
+
+        JTextArea jtaPing = new JTextArea(getPingText());
+        jtaPing.setEditable(false);
+        jtaPing.setBackground(new Color(0, 0, 0, 0));
 
         JButton jButton = new JButton(mResult.followed ? JBFOLLOW_TEXT_UNFOLLOW : JBFOLLOW_TEXT_FOLLOW);
         jButton.setName(JBFOLLOW_NAME);
         jButton.setActionCommand(mResult.name);
         jButton.addActionListener(mActionListener);
 
-        jTextArea.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-        jButton.setAlignmentY(Component.BOTTOM_ALIGNMENT);
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.add(jtaPing, BorderLayout.WEST);
+        bottomPanel.add(jButton, BorderLayout.EAST);
 
-        this.add(jTextArea);
-        this.add(Box.createHorizontalGlue());
-        this.add(jButton);
+        this.add(jtaSpecs, BorderLayout.NORTH);
+        this.add(jtaDescription, BorderLayout.CENTER);
+        this.add(bottomPanel, BorderLayout.SOUTH);
     }
 
     public ResultPanel(ActionListener listener, Result result) {
