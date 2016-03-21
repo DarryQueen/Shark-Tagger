@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import api.jaws.Jaws;
 import api.jaws.Ping;
 import api.jaws.Shark;
+import sharktagger.controller.search.SharkOfTheDay;
 import sharktagger.model.UserPreference;
 import sharktagger.view.SearchFrame;
 import sharktagger.view.search.ResultPanel;
@@ -32,6 +33,9 @@ public class SearchController implements ActionListener {
     /** SearchFrame instance representing the view. */
     private SearchFrame mSearchFrame;
 
+    /** Shark of the day. */
+    private Shark mSharkOfTheDay;
+
     /**
      * Standard constructor.
      * @param pref UserPreference object.
@@ -42,6 +46,8 @@ public class SearchController implements ActionListener {
         mJaws = jaws;
         List<String> locations = jaws.getTagLocations();
         String acknowledgement = jaws.getAcknowledgement();
+
+        mSharkOfTheDay = new SharkOfTheDay(jaws, pref.getLastUpdated()).getSharkOfTheDay();
 
         mSearchFrame = new SearchFrame(this, locations, acknowledgement);
     }
