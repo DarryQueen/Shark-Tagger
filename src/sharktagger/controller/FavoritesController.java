@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import api.jaws.Jaws;
 import api.jaws.Location;
 import api.jaws.Shark;
+import sharktagger.controller.favorites.Locator;
 import sharktagger.model.UserPreference;
 import sharktagger.view.FavoritesFrame;
 
@@ -37,6 +38,8 @@ public class FavoritesController implements ActionListener, UserPreference.Prefe
     /** Refresh atomicity. */
     private Semaphore mRefreshSemaphore;
 
+    private Locator mLocator;
+
     /**
      * Standard constructor.
      * @param pref UserPreference object.
@@ -52,6 +55,8 @@ public class FavoritesController implements ActionListener, UserPreference.Prefe
         mFavoritesFrame = new FavoritesFrame(this);
 
         mRefreshSemaphore = new Semaphore(1);
+
+        mLocator = new Locator();
 
         // Refresh the favorites panel.
         refreshFavorites();
@@ -77,12 +82,15 @@ public class FavoritesController implements ActionListener, UserPreference.Prefe
 
             List<String> favorites = mUserPreference.getFavorites();
             List<Shark> sharks = new ArrayList<Shark>();
+            Dictionary<String, Location> locations = new Hashtable<String, Location>();
             Dictionary<String, Double> distances = new Hashtable<String, Double>();
 
             for (String sharkName : favorites) {
                 Shark shark = mJaws.getShark(sharkName);
+                Location location = mJaws.getLastLocation(sharkName);
                 sharks.add(shark);
-                distances.put(sharkName, getDistanceFromKings(mJaws.getLastLocation(sharkName)));
+                locations.put(sharkName, location);
+                distances.put(sharkName, getDistanceFromKings(location));
             }
 
             // Sort the list by distance from King's.
@@ -98,8 +106,9 @@ public class FavoritesController implements ActionListener, UserPreference.Prefe
 
             mFavoritesFrame.clearFavorites();
             for (Shark shark : sharks) {
+                boolean isOnLand = mLocator.isOnLand(locations.get(shark.getName()));
                 double distance = distances.get(shark.getName());
-                mFavoritesFrame.addFavorite(shark, distance);
+                mFavoritesFrame.addFavorite(shark, distance, isOnLand);
             }
 
             mRefreshSemaphore.release();
