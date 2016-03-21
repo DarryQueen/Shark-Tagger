@@ -2,7 +2,10 @@ package sharktagger.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,14 +27,21 @@ import org.xml.sax.SAXException;
 
 public class UserPreference {
     private static final String ROOT_ELEMENT_NAME = "preferences";
+    private static final String LAST_UPDATED_ELEMENT_NAME = "last_updated";
     private static final String FAVORITES_ELEMENT_NAME = "favorites";
     private static final String FAVORITE_SHARK_ELEMENT_NAME = "shark";
 
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private Set<String> mFavorites;
+    private Date mLastUpdated;
+
     private Set<PreferenceUpdateListener> mUpdateListeners;
 
     public UserPreference() {
         mFavorites = new HashSet<String>();
+        mLastUpdated = new Date();
+
         mUpdateListeners = new HashSet<PreferenceUpdateListener>();
     }
 
@@ -111,6 +121,16 @@ public class UserPreference {
         }
 
         Element rootElement = document.getDocumentElement();
+
+        Element timeUpdatedElement = (Element) rootElement.getElementsByTagName(LAST_UPDATED_ELEMENT_NAME).item(0);
+        String timeUpdated = timeUpdatedElement.getTextContent();
+        try {
+            userPreference.mLastUpdated = DATE_FORMATTER.parse(timeUpdated);
+        } catch (ParseException e) {
+            System.out.println("Preference file corrupted. Erase and try again.");
+            System.exit(-1);
+        }
+
         Element favoritesElement = (Element) rootElement.getElementsByTagName(FAVORITES_ELEMENT_NAME).item(0);
         NodeList favoritesList = favoritesElement.getElementsByTagName(FAVORITE_SHARK_ELEMENT_NAME);
 
@@ -118,7 +138,7 @@ public class UserPreference {
             Element sharkElement = (Element) favoritesList.item(i);
             String sharkName = sharkElement.getTextContent();
 
-            userPreference.toggleFavorite(sharkName);
+            userPreference.mFavorites.add(sharkName);
         }
 
         return userPreference;
@@ -142,6 +162,10 @@ public class UserPreference {
 
         Element rootElement = document.createElement(ROOT_ELEMENT_NAME);
         document.appendChild(rootElement);
+
+        Element timeUpdatedElement = document.createElement(LAST_UPDATED_ELEMENT_NAME);
+        timeUpdatedElement.appendChild(document.createTextNode(DATE_FORMATTER.format(mLastUpdated)));
+        rootElement.appendChild(timeUpdatedElement);
 
         Element favoritesElement = document.createElement(FAVORITES_ELEMENT_NAME);
         rootElement.appendChild(favoritesElement);
