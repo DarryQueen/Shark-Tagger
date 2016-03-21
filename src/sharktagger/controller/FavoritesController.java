@@ -21,7 +21,7 @@ import sharktagger.model.UserPreference;
 import sharktagger.view.FavoritesFrame;
 
 public class FavoritesController implements ActionListener, UserPreference.PreferenceUpdateListener {
-    public static final Location KINGS_LOCATION = new Location(51.5119, 0.1161);
+    public static final Location KINGS_LOCATION = new Location(51.511500, -0.115965);
 
     /** SearchController instance to keep when opening up favorite shark. */
     private SearchController mSearchController;
