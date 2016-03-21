@@ -21,6 +21,7 @@ public class Main {
         MenuController mController = new MenuController(preferences, sController, fController);
 
         preferences.addUpdateListener(fController);
+        preferences.addUpdateListener(mController);
 
         mController.open();
     }

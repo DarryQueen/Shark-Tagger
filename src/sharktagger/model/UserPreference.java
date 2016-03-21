@@ -65,12 +65,20 @@ public class UserPreference {
     }
 
     /**
-     * Returns true if the shark is followed, false otherwise;
+     * Returns true if the shark is followed, false otherwise.
      * @param name String name of shark.
      * @return boolean if shark is followed.
      */
     public boolean isFavorite(String name) {
         return mFavorites.contains(name);
+    }
+
+    /**
+     * Returns true if any sharks are favorited, false otherwise.
+     * @return boolean true if any sharks are favorited, false otherwise.
+     */
+    public boolean hasFavorites() {
+        return !mFavorites.isEmpty();
     }
 
     /**
