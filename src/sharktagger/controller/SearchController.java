@@ -34,9 +34,7 @@ public class SearchController implements ActionListener {
 
     /**
      * Standard constructor.
-     * 
-     * @param pref
-     *            UserPreference object.
+     * @param pref UserPreference object.
      */
     public SearchController(UserPreference pref, Jaws jaws) {
         mUserPreference = pref;
@@ -63,9 +61,7 @@ public class SearchController implements ActionListener {
 
     /**
      * Open the search frame and load the results with the given shark.
-     * 
-     * @param sharkName
-     *            String name of shark to display in result.
+     * @param sharkName String name of shark to display in result.
      */
     public void open(String sharkName) {
         Shark shark = mJaws.getShark(sharkName);
@@ -118,12 +114,10 @@ public class SearchController implements ActionListener {
         for (Ping ping : pings) {
             Shark shark = mJaws.getShark(ping.getName());
 
-            // Dropdown strings just happen to match, so we get lucky. This is
-            // hackish.
+            // Dropdown strings just happen to match, so we get lucky. This is hackish.
             boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
             boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
-            boolean locationMatch = query.location == SearchFrame.OPTION_ALL
-                    || query.location.equals(shark.getTagLocation());
+            boolean locationMatch = query.location == SearchFrame.OPTION_ALL || query.location.equals(shark.getTagLocation());
             boolean newShark = !seenNames.contains(shark.getName());
 
             if (genderMatch && stageMatch && locationMatch && newShark) {
