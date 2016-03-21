@@ -41,8 +41,9 @@ public class SearchController implements ActionListener {
 
         mJaws = jaws;
         List<String> locations = jaws.getTagLocations();
+        String acknowledgement = jaws.getAcknowledgement();
 
-        mSearchFrame = new SearchFrame(this, locations);
+        mSearchFrame = new SearchFrame(this, locations, acknowledgement);
     }
 
     /**

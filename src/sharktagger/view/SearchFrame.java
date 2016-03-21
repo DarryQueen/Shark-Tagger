@@ -1,15 +1,24 @@
 package sharktagger.view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 
 import api.jaws.Ping;
 import api.jaws.Shark;
@@ -21,6 +30,12 @@ public class SearchFrame extends JFrame {
     /** String constants. */
     public static final String TITLE = "Search";
     public static final String JBSEARCH_TEXT = "Search";
+
+    public static final String DROPDOWN_TITLE = "Shark Tracker";
+    public static final String RANGE_DROPDOWN_TITLE = "Tracking Range";
+    public static final String GENDER_DROPDOWN_TITLE = "Gender";
+    public static final String STAGE_DROPDOWN_TITLE = "Stage of Life";
+    public static final String LOCATION_DROPDOWN_TITLE = "Tag Location";
 
     /** Internal naming constants. */
     public static final String JBSEARCH_NAME = "sharktagger.view.SearchFrame.jbSearch";
@@ -57,31 +72,75 @@ public class SearchFrame extends JFrame {
 
     private JPanel jpResults;
 
-    private void setupUI() {
-        // Left side query.
-        JPanel queryPanel = new JPanel();
+    private String mAcknowledgement;
 
+    private void setupUI() {
+        this.setLayout(new BorderLayout());
+
+        // Left side query.
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.setLayout(new BorderLayout());
+
+        JPanel queryPanel = new JPanel();
+        queryPanel.setLayout(new GridLayout(0, 1));
+
+        JLabel jlDropdown = new JLabel(DROPDOWN_TITLE);
+        JLabel jlRange = new JLabel(RANGE_DROPDOWN_TITLE);
+        JLabel jlGender = new JLabel(GENDER_DROPDOWN_TITLE);
+        JLabel jlStage = new JLabel(STAGE_DROPDOWN_TITLE);
+        JLabel jlLocation = new JLabel(LOCATION_DROPDOWN_TITLE);
+
+        queryPanel.add(jlDropdown);
+        queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        queryPanel.add(jlRange);
         queryPanel.add(jcbRange);
+        queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        queryPanel.add(jlGender);
         queryPanel.add(jcbGender);
+        queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        queryPanel.add(jlStage);
         queryPanel.add(jcbStage);
+        queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
+        queryPanel.add(jlLocation);
         queryPanel.add(jcbLocation);
+        queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         queryPanel.add(jbSearch);
+
+        optionsPanel.add(queryPanel, BorderLayout.NORTH);
+        optionsPanel.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
+
+        ImageIcon sharkIcon = new ImageIcon(MenuFrame.LOGO_PATH);
+        Image sharkImage = sharkIcon.getImage();
+        Image scaledSharkImage = sharkImage.getScaledInstance(240, 240, Image.SCALE_SMOOTH);
+        sharkIcon = new ImageIcon(scaledSharkImage);
+
+        JLabel jlShark = new JLabel(sharkIcon);
+        optionsPanel.add(jlShark, BorderLayout.SOUTH);
 
         // Right side search results.
         jpResults.setLayout(new BoxLayout(jpResults, BoxLayout.PAGE_AXIS));
+        jpResults.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         JScrollPane resultsScrollPane = new JScrollPane(jpResults, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
         // JSplitPane.
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(DIVIDER_LOCATION);
-        splitPane.setLeftComponent(queryPanel);
+        splitPane.setLeftComponent(optionsPanel);
         splitPane.setRightComponent(resultsScrollPane);
         splitPane.setEnabled(false);
+        splitPane.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
 
-        this.add(splitPane);
+        this.add(splitPane, BorderLayout.CENTER);
+
+        // Acknowledgement.
+        JLabel jlAcknowledgement = new JLabel(mAcknowledgement);
+        jlAcknowledgement.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        this.add(jlAcknowledgement, BorderLayout.SOUTH);
+
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
     }
 
-    public SearchFrame(ActionListener listener, List<String> locations) {
+    public SearchFrame(ActionListener listener, List<String> locations, String acknowledgement) {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
 
@@ -89,6 +148,7 @@ public class SearchFrame extends JFrame {
         String[] locationsArray = new String[locations.size()];
 
         mActionListener = listener;
+        mAcknowledgement = acknowledgement;
 
         jcbRange = new JComboBox<String>(RANGE_OPTIONS);
         jcbGender = new JComboBox<String>(GENDER_OPTIONS);

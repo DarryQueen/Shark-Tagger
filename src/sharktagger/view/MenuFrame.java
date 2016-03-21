@@ -1,11 +1,20 @@
 package sharktagger.view;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
 public class MenuFrame extends JFrame {
@@ -15,6 +24,9 @@ public class MenuFrame extends JFrame {
     public static final String TITLE = "Shark Tagger";
     public static final String JBSEARCH_TEXT = "Search";
     public static final String JBFAVORITES_TEXT = "Favorites";
+
+    public static final String LOGO_PATH = "shark.jpg";
+    public static final int LOGO_IMAGELENGTH = 180;
 
     /** Internal naming constants. */
     public static final String JBSEARCH_NAME = "sharktagger.view.MenuFrame.jbSearch";
@@ -28,10 +40,29 @@ public class MenuFrame extends JFrame {
     private JButton jbFavorites;
 
     private void setupUI() {
-        this.setLayout(new GridLayout(0, 1));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
-        this.add(jbSearch);
-        this.add(jbFavorites);
+        ImageIcon sharkIcon = new ImageIcon(LOGO_PATH);
+        Image sharkImage = sharkIcon.getImage();
+        Image scaledSharkImage = sharkImage.getScaledInstance(LOGO_IMAGELENGTH, LOGO_IMAGELENGTH, Image.SCALE_SMOOTH);
+        sharkIcon = new ImageIcon(scaledSharkImage);
+
+        JLabel jlShark = new JLabel(sharkIcon);
+        jlShark.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JPanel jpMenu = new JPanel();
+        jpMenu.setLayout(new GridLayout(0, 1));
+        jpMenu.add(jbSearch);
+        jpMenu.add(jbFavorites);
+
+        mainPanel.add(jlShark);
+        mainPanel.add(Box.createRigidArea(new Dimension(0, 60)));
+        mainPanel.add(jpMenu);
+
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+
+        this.add(mainPanel);
     }
 
     public MenuFrame(ActionListener actionListener, WindowListener windowListener) {
