@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import api.jaws.Ping;
 import api.jaws.Shark;
 import sharktagger.view.search.ResultPanel;
+import sharktagger.view.search.SharkOfTheDayPanel;
 
 public class SearchFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -163,6 +164,12 @@ public class SearchFrame extends JFrame {
         jpResults = new JPanel();
 
         setupUI();
+    }
+
+    public void setSharkOfTheDay(String name, String videoLink) {
+        jpResults.removeAll();
+        jpResults.add(new SharkOfTheDayPanel(mActionListener, name, videoLink));
+        repaint(); revalidate();
     }
 
     public void addResult(Shark shark, Ping ping, boolean followed) {
