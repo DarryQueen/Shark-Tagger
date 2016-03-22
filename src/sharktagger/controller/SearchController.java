@@ -85,7 +85,7 @@ public class SearchController implements ActionListener {
         mSearchFrame.clearResults();
         mSearchFrame.addResult(shark, null, mUserPreference.isFavorite(sharkName));
 
-        open();
+        mSearchFrame.setVisible(true);
     }
 
     private List<Shark> performQuery(SearchFrame.Query query) {
