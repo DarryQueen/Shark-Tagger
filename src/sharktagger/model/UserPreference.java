@@ -2,7 +2,11 @@ package sharktagger.model;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,16 +27,46 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 public class UserPreference {
+    private static final String ROOT_ELEMENT_NAME = "preferences";
+    private static final String LAST_UPDATED_ELEMENT_NAME = "last_updated";
+    private static final String FAVORITES_ELEMENT_NAME = "favorites";
+    private static final String FAVORITE_SHARK_ELEMENT_NAME = "shark";
+
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     private Set<String> mFavorites;
+    private Date mLastUpdated;
+
     private Set<PreferenceUpdateListener> mUpdateListeners;
 
     public UserPreference() {
         mFavorites = new HashSet<String>();
+        mLastUpdated = new Date();
+
         mUpdateListeners = new HashSet<PreferenceUpdateListener>();
     }
 
     public List<String> getFavorites() {
         return new ArrayList<String>(mFavorites);
+    }
+
+    public Date getLastUpdated() {
+        return mLastUpdated;
+    }
+
+    public Date refreshLastUpdated() {
+        Calendar c = Calendar.getInstance();
+        c.setTime(mLastUpdated);
+        Date currentDate = new Date();
+
+        // While we're less, keep adding a day.
+        while (c.getTime().compareTo(currentDate) < 0) {
+            c.add(Calendar.DATE, 1);
+        }
+
+        c.add(Calendar.DATE, -1);
+        mLastUpdated = c.getTime();
+        return mLastUpdated;
     }
 
     public void addUpdateListener(PreferenceUpdateListener listener) {
@@ -107,14 +141,33 @@ public class UserPreference {
         }
 
         Element rootElement = document.getDocumentElement();
-        Element favoritesElement = (Element) rootElement.getElementsByTagName("favorites").item(0);
-        NodeList favoritesList = favoritesElement.getElementsByTagName("shark");
 
-        for (int i = 0; i < favoritesList.getLength(); i++) {
-            Element sharkElement = (Element) favoritesList.item(i);
-            String sharkName = sharkElement.getTextContent();
+        Element timeUpdatedElement = (Element) rootElement.getElementsByTagName(LAST_UPDATED_ELEMENT_NAME).item(0);
+        if (timeUpdatedElement != null) {
+            String timeUpdated = timeUpdatedElement.getTextContent();
+            try {
+                userPreference.mLastUpdated = DATE_FORMATTER.parse(timeUpdated);
+            } catch (ParseException e) {
+                System.out.println("Preference file corrupted. Erase and try again.");
+                System.exit(-1);
+            }
+        } else {
+            System.out.println("last_updated field not found. Creating a new one.");
+        }
+        userPreference.refreshLastUpdated();
 
-            userPreference.toggleFavorite(sharkName);
+        Element favoritesElement = (Element) rootElement.getElementsByTagName(FAVORITES_ELEMENT_NAME).item(0);
+        if (favoritesElement != null) {
+            NodeList favoritesList = favoritesElement.getElementsByTagName(FAVORITE_SHARK_ELEMENT_NAME);
+
+            for (int i = 0; i < favoritesList.getLength(); i++) {
+                Element sharkElement = (Element) favoritesList.item(i);
+                String sharkName = sharkElement.getTextContent();
+
+                userPreference.mFavorites.add(sharkName);
+            }
+        } else {
+            System.out.println("favorites field not found. Creating a new one.");
         }
 
         return userPreference;
@@ -136,14 +189,18 @@ public class UserPreference {
         }
         Document document = db.newDocument();
 
-        Element rootElement = document.createElement("preferences");
+        Element rootElement = document.createElement(ROOT_ELEMENT_NAME);
         document.appendChild(rootElement);
 
-        Element favoritesElement = document.createElement("favorites");
+        Element timeUpdatedElement = document.createElement(LAST_UPDATED_ELEMENT_NAME);
+        timeUpdatedElement.appendChild(document.createTextNode(DATE_FORMATTER.format(mLastUpdated)));
+        rootElement.appendChild(timeUpdatedElement);
+
+        Element favoritesElement = document.createElement(FAVORITES_ELEMENT_NAME);
         rootElement.appendChild(favoritesElement);
 
         for (String sharkName : mFavorites) {
-            Element sharkElement = document.createElement("shark");
+            Element sharkElement = document.createElement(FAVORITE_SHARK_ELEMENT_NAME);
             sharkElement.appendChild(document.createTextNode(sharkName));
             favoritesElement.appendChild(sharkElement);
         }
