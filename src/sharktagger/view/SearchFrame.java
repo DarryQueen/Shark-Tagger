@@ -135,10 +135,11 @@ public class SearchFrame extends JFrame {
 
         // Acknowledgement.
         JLabel jlAcknowledgement = new JLabel(mAcknowledgement);
+        jlAcknowledgement.setForeground(Color.GRAY);
         jlAcknowledgement.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         this.add(jlAcknowledgement, BorderLayout.SOUTH);
 
-        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 8));
     }
 
     public SearchFrame(ActionListener listener, List<String> locations, String acknowledgement) {
