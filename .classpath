@@ -7,7 +7,7 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/PRAGroup/Coursework%20Resources/doc.zip!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Users/xubohan/git/pracoursework/Coursework Resources/jcommon-1.0.23.jar"/>
-	<classpathentry kind="lib" path="/Users/xubohan/git/pracoursework/Coursework Resources/jfreechart-1.0.19.jar"/>
+	<classpathentry kind="lib" path="Coursework Resources/jcommon-1.0.23.jar"/>
+	<classpathentry kind="lib" path="Coursework Resources/jfreechart-1.0.19.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
