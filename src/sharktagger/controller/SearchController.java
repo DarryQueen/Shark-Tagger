@@ -218,6 +218,9 @@ public class SearchController implements ActionListener {
             r = new Runnable() {
                 @Override
                 public void run() {
+                    mStatisticsFrame.setUpdating();
+                    mStatisticsFrame.setVisible(true);
+
                     List<Shark> sharks = new LinkedList<Shark>();
                     performQuery(query, new PingGroupFoundListener() {
                         @Override
@@ -227,7 +230,6 @@ public class SearchController implements ActionListener {
                     });
 
                     mStatisticsFrame.setStatistic(getStatistic(sharks));
-                    mStatisticsFrame.setVisible(true);
                 }
             };
 

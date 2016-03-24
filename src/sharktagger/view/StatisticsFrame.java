@@ -20,10 +20,13 @@ public class StatisticsFrame extends JFrame {
 
     /** String constants. */
     public static final String TITLE = "Statistics";
+
     public static final String GENDER_PIECHART_TITLE = "Gender";
     public static final String STAGE_PIECHART_TITLE = "Stage of Life";
     public static final String LOCATION_PIECHART_TITLE = "Tag Location";
-    private static final String STATISTICS_EMPTY_MESSAGE = "No sharks are found with selected option set.";
+
+    private static final String STATISTICS_EMPTY_TEXT = "No sharks are found with selected option set.";
+    private static final String STATISTICS_UPDATING_TEXT = "Updating statistics...";
 
     public static final int WIDTH = 500;
     public static final int HEIGHT = 1000;
@@ -32,10 +35,12 @@ public class StatisticsFrame extends JFrame {
     private Statistic mStatistic;
 
     private JLabel jlEmpty;
+    private JLabel jlUpdating;
     private JPanel jpMain;
 
     public void setupUI() {
         jlEmpty.setHorizontalAlignment(JLabel.CENTER);
+        jlUpdating.setHorizontalAlignment(JLabel.CENTER);
 
         jpMain.setLayout(new GridLayout(0, 1));
     }
@@ -44,12 +49,19 @@ public class StatisticsFrame extends JFrame {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
 
-        jlEmpty = new JLabel(STATISTICS_EMPTY_MESSAGE);
+        jlEmpty = new JLabel(STATISTICS_EMPTY_TEXT);
+        jlUpdating = new JLabel(STATISTICS_UPDATING_TEXT);
         jpMain = new JPanel();
 
         setupUI();
 
         setStatistic(null);
+    }
+
+    public void setUpdating() {
+        this.getContentPane().removeAll();
+
+        this.add(jlUpdating);
     }
 
     public void setStatistic(Statistic stat) {
@@ -68,6 +80,7 @@ public class StatisticsFrame extends JFrame {
             jpMain.add(chartPanel);
         }
         this.add(jpMain);
+        repaint(); revalidate();
     }
 
     private List<JFreeChart> getCharts() {
