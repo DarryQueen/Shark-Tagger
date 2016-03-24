@@ -12,8 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -39,7 +40,7 @@ public class SearchController implements ActionListener {
     /** Jaws object. */
     private Jaws mJaws;
 
-    /** SearchFrame instance representing the view. */
+    /** Frame instances representing the views. */
     private SearchFrame mSearchFrame;
     private StatisticsFrame mStatisticsFrame;
 
@@ -67,6 +68,7 @@ public class SearchController implements ActionListener {
         }
 
         mSearchFrame = new SearchFrame(this, locations, acknowledgement);
+        mStatisticsFrame = new StatisticsFrame();
     }
 
     /**
@@ -91,9 +93,9 @@ public class SearchController implements ActionListener {
         mSearchFrame.setVisible(true);
     }
 
-    private List<Shark> performQuery(SearchFrame.Query query) {
+    private List<PingGroup> performQuery(SearchFrame.Query query, PingGroupFoundListener listener) {
         // Initialize an empty list.
-        List<Shark> sharks = new LinkedList<Shark>();
+        List<PingGroup> pingGroups = new LinkedList<PingGroup>();
         List<Ping> pings = new ArrayList<Ping>();
 
         // Time query.
@@ -140,101 +142,46 @@ public class SearchController implements ActionListener {
             boolean newShark = !seenNames.contains(shark.getName());
 
             if (genderMatch && stageMatch && locationMatch && newShark) {
-                sharks.add(shark);
+                PingGroup pingGroup = new PingGroup(ping, shark);
+
+                pingGroups.add(pingGroup);
                 seenNames.add(shark.getName());
 
-                mSearchFrame.addResult(shark, ping, mUserPreference.isFavorite(shark.getName()));
+                if (listener != null)
+                    listener.pingGroupFound(pingGroup);
             }
         }
 
-        return sharks;
+        return pingGroups;
     }
 
-    private StatisticsFrame performStatisticsQuery(SearchFrame.Query query) {
-        // Initialize an empty list.
-        List<Shark> sharks = new LinkedList<Shark>();
-        List<Ping> pings = new ArrayList<Ping>();
+    private StatisticsFrame.Statistic getStatistic(List<Shark> sharks) {
+        Dictionary<String, Integer> genderCount = new Hashtable<String, Integer>();
+        Dictionary<String, Integer> stageCount = new Hashtable<String, Integer>();
+        Dictionary<String, Integer> locationCount = new Hashtable<String, Integer>();
 
-        // Time query.
-        switch (query.range) {
-        case SearchFrame.RANGE_DAY:
-            pings = mJaws.past24Hours();
-            break;
-        case SearchFrame.RANGE_WEEK:
-            pings = mJaws.pastWeek();
-            break;
-        case SearchFrame.RANGE_MONTH:
-            pings = mJaws.pastMonth();
-            break;
-        default:
-            System.out.println("Unknown time range: " + query.range);
+        // Initialize some dictionaries.
+        genderCount.put(SearchFrame.GENDER_MALE, 0);
+        genderCount.put(SearchFrame.GENDER_FEMALE, 0);
+
+        stageCount.put(SearchFrame.STAGE_MATURE, 0);
+        stageCount.put(SearchFrame.STAGE_IMMATURE, 0);
+        stageCount.put(SearchFrame.STAGE_UNDETERMINED, 0);
+
+        for (Shark shark : sharks) {
+            genderCount.put(shark.getGender(), genderCount.get(shark.getGender()) + 1);
+
+            stageCount.put(shark.getStageOfLife(), stageCount.get(shark.getStageOfLife()) + 1);
+
+            String location = shark.getTagLocation();
+            if (locationCount.get(location) == null) {
+                locationCount.put(location, 1);
+            } else {
+                locationCount.put(location, locationCount.get(location) + 1);
+            }
         }
 
-        // Sort pings, latest first.
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Collections.sort(pings, new Comparator<Ping>() {
-            @Override
-            public int compare(Ping p1, Ping p2) {
-                Date date1 = null, date2 = null;
-                try {
-                    date1 = formatter.parse(p1.getTime());
-                    date2 = formatter.parse(p2.getTime());
-                } catch (Exception e) {
-                    // I really don't care.
-                    e.printStackTrace();
-                }
-                return -1 * date1.compareTo(date2);
-            }
-        });
-
-        // Filter.
-        Set<String> seenNames = new HashSet<String>();
-        for (Ping ping : pings) {
-            Shark shark = mJaws.getShark(ping.getName());
-
-            // Dropdown strings just happen to match, so we get lucky. This is
-            // hackish.
-            boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
-            boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
-            boolean locationMatch = query.location == SearchFrame.OPTION_ALL
-                    || query.location.equals(shark.getTagLocation());
-            boolean newShark = !seenNames.contains(shark.getName());
-
-            if (genderMatch && stageMatch && locationMatch && newShark) {
-                sharks.add(shark);
-                seenNames.add(shark.getName());
-            }
-        }
-        // mStatisticsFrame.addResult(sharks);
-        int maleCount = 0;
-        int femaleCount = 0;
-        int matureCount = 0;
-        int immatureCount = 0;
-        int undeterminedCount = 0;
-        HashMap<String, Integer> locationMap = new HashMap<String, Integer>();
-        for (Shark s : sharks) {
-            if (s.getGender().equals(SearchFrame.GENDER_MALE)) {
-                maleCount++;
-            } else {
-                femaleCount++;
-            }
-
-            if (s.getStageOfLife().equals(SearchFrame.STAGE_MATURE)) {
-                matureCount++;
-            } else if (s.getStageOfLife().equals(SearchFrame.STAGE_IMMATURE)) {
-                immatureCount++;
-            } else {
-                undeterminedCount++;
-            }
-
-            String location = s.getTagLocation();
-            if (locationMap.containsKey(location)) {
-                locationMap.replace(location, (locationMap.get(location) + 1));
-            } else {
-                locationMap.put(location, 1);
-            }
-        }
-        return new StatisticsFrame(maleCount, femaleCount, matureCount, immatureCount, undeterminedCount, locationMap);
+        return new StatisticsFrame.Statistic(genderCount, stageCount, locationCount);
     }
 
     @Override
@@ -242,16 +189,45 @@ public class SearchController implements ActionListener {
         Component component = (Component) e.getSource();
 
         JButton jButton;
+        Runnable r;
+        SearchFrame.Query query;
         switch (component.getName()) {
         case SearchFrame.JBSEARCH_NAME:
-            SearchFrame.Query query = mSearchFrame.getQuery();
+            query = mSearchFrame.getQuery();
 
             // Do not interrupt UI while these queries are happening.
-            Runnable r = new Runnable() {
+            r = new Runnable() {
                 @Override
                 public void run() {
                     mSearchFrame.clearResults();
-                    performQuery(query);
+                    performQuery(query, new PingGroupFoundListener() {
+                        @Override
+                        public void pingGroupFound(PingGroup pingGroup) {
+                            mSearchFrame.addResult(pingGroup.shark, pingGroup.ping, mUserPreference.isFavorite(pingGroup.shark.getName()));
+                        }
+                    });
+                }
+            };
+
+            new Thread(r).start();
+            break;
+        case SearchFrame.JBSTATISTICS_NAME:
+            query = mSearchFrame.getQuery();
+
+            // Do not interrupt UI while these queries are happening.
+            r = new Runnable() {
+                @Override
+                public void run() {
+                    List<Shark> sharks = new LinkedList<Shark>();
+                    performQuery(query, new PingGroupFoundListener() {
+                        @Override
+                        public void pingGroupFound(PingGroup pingGroup) {
+                            sharks.add(pingGroup.shark);
+                        }
+                    });
+
+                    mStatisticsFrame.setStatistic(getStatistic(sharks));
+                    mStatisticsFrame.setVisible(true);
                 }
             };
 
@@ -281,19 +257,6 @@ public class SearchController implements ActionListener {
             }
 
             break;
-        case SearchFrame.JBSTATISTICS_NAME:
-            SearchFrame.Query query2 = mSearchFrame.getQuery();
-
-            // Do not interrupt UI while these queries are happening.
-            Runnable r2 = new Runnable() {
-                @Override
-                public void run() {
-                    StatisticsFrame jfStatistics = performStatisticsQuery(query2);
-                    jfStatistics.setVisible(true);
-                }
-            };
-            new Thread(r2).start();
-            break;
         default:
             System.out.println("Unknown action source: " + component.getName());
         }
@@ -307,5 +270,12 @@ public class SearchController implements ActionListener {
             ping = p;
             shark = s;
         }
+    }
+
+    /**
+     * Use in order that the queries can update while they are run.
+     */
+    private static interface PingGroupFoundListener {
+        public void pingGroupFound(PingGroup pingGroup);
     }
 }

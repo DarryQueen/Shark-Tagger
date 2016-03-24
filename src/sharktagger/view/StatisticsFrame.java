@@ -1,19 +1,19 @@
 package sharktagger.view;
 
 import java.awt.GridLayout;
-import java.util.HashMap;
+import java.util.Dictionary;
+import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map.Entry;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
-
-import api.jaws.Shark;
 
 public class StatisticsFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -29,104 +29,108 @@ public class StatisticsFrame extends JFrame {
     public static final int HEIGHT = 1000;
 
     /** Instance variables. */
-    private JFreeChart chartGender;
-    private DefaultPieDataset dataGender;
-    private ChartPanel chpGender;
-    private JFreeChart chartStage;
-    private DefaultPieDataset dataStage;
-    private ChartPanel chpStage;
-    private JFreeChart chartLocation;
-    private DefaultPieDataset dataLocation;
-    private ChartPanel chpLocation;
+    private Statistic mStatistic;
 
-    private int maleCount;
-    private int femaleCount;
-    private int matureCount;
-    private int immatureCount;
-    private int undeterminedCount;
-    HashMap<String, Integer> locationMap;
+    private JLabel jlEmpty;
+    private JPanel jpMain;
 
     public void setupUI() {
-        if (locationMap.size() > 0) {
-            this.setLayout(new GridLayout(3, 1));
-            createDataset();
-            createChart();
-            chpGender = new ChartPanel(chartGender);
-            chpStage = new ChartPanel(chartStage);
-            chpLocation = new ChartPanel(chartLocation);
-            this.add(chpGender);
-            this.add(chpStage);
-            this.add(chpLocation);
-        } else {
-            JLabel emptyMessage = new JLabel(STATISTICS_EMPTY_MESSAGE);
-            emptyMessage.setHorizontalAlignment(JLabel.CENTER);
-            this.add(emptyMessage);
-        }
+        jlEmpty.setHorizontalAlignment(JLabel.CENTER);
+
+        jpMain.setLayout(new GridLayout(0, 1));
     }
 
-    public StatisticsFrame(int maleCount, int femaleCount, int matureCount, int immatureCount, int undeterminedCount, HashMap<String, Integer> locationMap) {
+    public StatisticsFrame() {
         super(TITLE);
         this.setSize(WIDTH, HEIGHT);
 
-        this.maleCount = maleCount;
-        this.femaleCount = femaleCount;
-        this.matureCount = matureCount;
-        this.immatureCount = immatureCount;
-        this.undeterminedCount = undeterminedCount;
-        this.locationMap = locationMap;
+        jlEmpty = new JLabel(STATISTICS_EMPTY_MESSAGE);
+        jpMain = new JPanel();
 
         setupUI();
+
+        setStatistic(null);
     }
 
-    private void createDataset() {
+    public void setStatistic(Statistic stat) {
+        mStatistic = stat;
+
+        this.getContentPane().removeAll();
+        jpMain.removeAll();
+        if (mStatistic == null || mStatistic.isEmpty()) {
+            this.add(jlEmpty);
+            return;
+        }
+
+        List<JFreeChart> charts = getCharts();
+        for (JFreeChart chart : charts) {
+            ChartPanel chartPanel = new ChartPanel(chart);
+            jpMain.add(chartPanel);
+        }
+        this.add(jpMain);
+    }
+
+    private List<JFreeChart> getCharts() {
+        DefaultPieDataset dataGender, dataStage, dataLocation;
+
         dataGender = new DefaultPieDataset();
-        if (maleCount > 0)
-            dataGender.setValue(SearchFrame.GENDER_MALE, maleCount);
-        if (femaleCount > 0)
-            dataGender.setValue(SearchFrame.GENDER_FEMALE, femaleCount);
+        if (mStatistic.getMaleCount() > 0)
+            dataGender.setValue(SearchFrame.GENDER_MALE, mStatistic.getMaleCount());
+        if (mStatistic.getFemaleCount() > 0)
+            dataGender.setValue(SearchFrame.GENDER_FEMALE, mStatistic.getFemaleCount());
 
         dataStage = new DefaultPieDataset();
-        if (matureCount > 0)
-            dataStage.setValue(SearchFrame.STAGE_MATURE, matureCount);
-        if (immatureCount > 0)
-            dataStage.setValue(SearchFrame.STAGE_IMMATURE, immatureCount);
-        if (undeterminedCount > 0)
-            dataStage.setValue(SearchFrame.STAGE_UNDETERMINED, undeterminedCount);
+        if (mStatistic.getMatureCount() > 0)
+            dataStage.setValue(SearchFrame.STAGE_MATURE, mStatistic.getMatureCount());
+        if (mStatistic.getImmatureCount() > 0)
+            dataStage.setValue(SearchFrame.STAGE_IMMATURE, mStatistic.getImmatureCount());
+        if (mStatistic.getUndeterminedCount() > 0)
+            dataStage.setValue(SearchFrame.STAGE_UNDETERMINED, mStatistic.getUndeterminedCount());
 
         dataLocation = new DefaultPieDataset();
-        for (Entry<String, Integer> entry : locationMap.entrySet()) {
-            dataLocation.setValue(entry.getKey(), entry.getValue());
+        Enumeration<String> keys = mStatistic.locationCount.keys();
+        String key;
+        while (keys.hasMoreElements()) {
+            key = keys.nextElement();
+            dataLocation.setValue(key, mStatistic.locationCount.get(key));
         }
+
+        List<JFreeChart> charts = new LinkedList<JFreeChart>();
+        charts.add(ChartFactory.createPieChart(GENDER_PIECHART_TITLE, dataGender));
+        charts.add(ChartFactory.createPieChart(STAGE_PIECHART_TITLE, dataStage));
+        charts.add(ChartFactory.createPieChart(LOCATION_PIECHART_TITLE, dataLocation));
+
+        return charts;
     }
 
-    private void createChart() {
-        chartGender = ChartFactory.createPieChart(GENDER_PIECHART_TITLE, dataGender);
-        chartStage = ChartFactory.createPieChart(STAGE_PIECHART_TITLE, dataStage);
-        chartLocation = ChartFactory.createPieChart(LOCATION_PIECHART_TITLE, dataLocation);
-    }
+    public static class Statistic {
+        public Dictionary<String, Integer> genderCount, stageCount, locationCount;
 
-    public void addResult(List<Shark> sharkList) {
-        for (Shark s : sharkList) {
-            if (s.getGender().equals(SearchFrame.STAGE_MATURE)) {
-                maleCount++;
-            } else {
-                femaleCount++;
-            }
+        public Statistic(Dictionary<String, Integer> gc, Dictionary<String, Integer> sc, Dictionary<String, Integer> lc) {
+            genderCount = gc;
+            stageCount = sc;
+            locationCount = lc;
+        }
 
-            if (s.getStageOfLife().equals(SearchFrame.STAGE_MATURE)) {
-                matureCount++;
-            } else if (s.getStageOfLife().equals(SearchFrame.STAGE_IMMATURE)) {
-                immatureCount++;
-            } else {
-                undeterminedCount++;
-            }
+        public boolean isEmpty() {
+            return locationCount.size() == 0;
+        }
 
-            String location = s.getTagLocation();
-            if (locationMap.containsKey(location)) {
-                locationMap.replace(location, (locationMap.get(location) + 1));
-            } else {
-                locationMap.put(location, 1);
-            }
+        public int getMaleCount() {
+            return genderCount.get(SearchFrame.GENDER_MALE);
+        }
+        public int getFemaleCount() {
+            return genderCount.get(SearchFrame.GENDER_FEMALE);
+        }
+
+        public int getMatureCount() {
+            return stageCount.get(SearchFrame.STAGE_MATURE);
+        }
+        public int getImmatureCount() {
+            return stageCount.get(SearchFrame.STAGE_IMMATURE);
+        }
+        public int getUndeterminedCount() {
+            return stageCount.get(SearchFrame.STAGE_UNDETERMINED);
         }
     }
 }
