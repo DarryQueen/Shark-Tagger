@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,174 +26,278 @@ import api.jaws.Shark;
 import sharktagger.controller.search.SharkOfTheDay;
 import sharktagger.model.UserPreference;
 import sharktagger.view.SearchFrame;
+import sharktagger.view.StatisticsFrame;
 import sharktagger.view.search.ResultPanel;
 import sharktagger.view.search.SharkOfTheDayPanel;
 
 public class SearchController implements ActionListener {
-    public static final String INVALID_VIDEO_LINK = "No footage available for this shark :-(";
+	public static final String INVALID_VIDEO_LINK = "No footage available for this shark :-(";
 
-    /** UserPrference object. */
-    private UserPreference mUserPreference;
+	/** UserPrference object. */
+	private UserPreference mUserPreference;
 
-    /** Jaws object. */
-    private Jaws mJaws;
+	/** Jaws object. */
+	private Jaws mJaws;
 
-    /** SearchFrame instance representing the view. */
-    private SearchFrame mSearchFrame;
+	/** SearchFrame instance representing the view. */
+	private SearchFrame mSearchFrame;
+	private StatisticsFrame mStatisticsFrame;
 
-    /** Shark of the day. */
-    private Shark mSharkOfTheDay;
-    private String mSharkVideoLink;
+	/** Shark of the day. */
+	private Shark mSharkOfTheDay;
+	private String mSharkVideoLink;
 
-    /**
-     * Standard constructor.
-     * @param pref UserPreference object.
-     */
-    public SearchController(UserPreference pref, Jaws jaws) {
-        mUserPreference = pref;
+	/**
+	 * Standard constructor.
+	 * 
+	 * @param pref
+	 *            UserPreference object.
+	 */
+	public SearchController(UserPreference pref, Jaws jaws) {
+		mUserPreference = pref;
 
-        mJaws = jaws;
-        List<String> locations = jaws.getTagLocations();
-        String acknowledgement = jaws.getAcknowledgement();
+		mJaws = jaws;
+		List<String> locations = jaws.getTagLocations();
+		String acknowledgement = jaws.getAcknowledgement();
 
-        mSharkOfTheDay = new SharkOfTheDay(jaws, pref.getLastUpdated()).getSharkOfTheDay();
+		mSharkOfTheDay = new SharkOfTheDay(jaws, pref.getLastUpdated()).getSharkOfTheDay();
 
-        mSharkVideoLink = null;
-        String link = mJaws.getVideo(mSharkOfTheDay.getName());
-        if (!link.equals(INVALID_VIDEO_LINK)) {
-            mSharkVideoLink = link;
-        }
+		mSharkVideoLink = null;
+		String link = mJaws.getVideo(mSharkOfTheDay.getName());
+		if (!link.equals(INVALID_VIDEO_LINK)) {
+			mSharkVideoLink = link;
+		}
 
-        mSearchFrame = new SearchFrame(this, locations, acknowledgement);
-    }
+		mSearchFrame = new SearchFrame(this, locations, acknowledgement);
+	}
 
-    /**
-     * Open the search frame to the Shark of the Day.
-     */
-    public void open() {
-        mSearchFrame.setSharkOfTheDay(mSharkOfTheDay.getName(), mSharkVideoLink);
+	/**
+	 * Open the search frame to the Shark of the Day.
+	 */
+	public void open() {
+		mSearchFrame.setSharkOfTheDay(mSharkOfTheDay.getName(), mSharkVideoLink);
 
-        mSearchFrame.setVisible(true);
-    }
+		mSearchFrame.setVisible(true);
+	}
 
-    /**
-     * Open the search frame and load the results with the given shark.
-     * @param sharkName String name of shark to display in result.
-     */
-    public void open(String sharkName) {
-        Shark shark = mJaws.getShark(sharkName);
+	/**
+	 * Open the search frame and load the results with the given shark.
+	 * 
+	 * @param sharkName
+	 *            String name of shark to display in result.
+	 */
+	public void open(String sharkName) {
+		Shark shark = mJaws.getShark(sharkName);
 
-        mSearchFrame.clearResults();
-        mSearchFrame.addResult(shark, null, mUserPreference.isFavorite(sharkName));
+		mSearchFrame.clearResults();
+		mSearchFrame.addResult(shark, null, mUserPreference.isFavorite(sharkName));
 
-        mSearchFrame.setVisible(true);
-    }
+		mSearchFrame.setVisible(true);
+	}
 
-    private List<Shark> performQuery(SearchFrame.Query query) {
-        // Initialize an empty list.
-        List<Shark> sharks = new LinkedList<Shark>();
-        List<Ping> pings = new ArrayList<Ping>();
+	private List<Shark> performQuery(SearchFrame.Query query) {
+		// Initialize an empty list.
+		List<Shark> sharks = new LinkedList<Shark>();
+		List<Ping> pings = new ArrayList<Ping>();
 
-        // Time query.
-        switch (query.range) {
-        case SearchFrame.RANGE_DAY:
-            pings = mJaws.past24Hours();
-            break;
-        case SearchFrame.RANGE_WEEK:
-            pings = mJaws.pastWeek();
-            break;
-        case SearchFrame.RANGE_MONTH:
-            pings = mJaws.pastMonth();
-            break;
-        default:
-            System.out.println("Unknown time range: " + query.range);
-        }
+		// Time query.
+		switch (query.range) {
+		case SearchFrame.RANGE_DAY:
+			pings = mJaws.past24Hours();
+			break;
+		case SearchFrame.RANGE_WEEK:
+			pings = mJaws.pastWeek();
+			break;
+		case SearchFrame.RANGE_MONTH:
+			pings = mJaws.pastMonth();
+			break;
+		default:
+			System.out.println("Unknown time range: " + query.range);
+		}
 
-        // Sort pings, latest first.
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Collections.sort(pings, new Comparator<Ping>() {
-            @Override
-            public int compare(Ping p1, Ping p2) {
-                Date date1 = null, date2 = null;
-                try {
-                    date1 = formatter.parse(p1.getTime());
-                    date2 = formatter.parse(p2.getTime());
-                } catch (Exception e) {
-                    // I really don't care.
-                    e.printStackTrace();
-                }
-                return -1 * date1.compareTo(date2);
-            }
-        });
+		// Sort pings, latest first.
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Collections.sort(pings, new Comparator<Ping>() {
+			@Override
+			public int compare(Ping p1, Ping p2) {
+				Date date1 = null, date2 = null;
+				try {
+					date1 = formatter.parse(p1.getTime());
+					date2 = formatter.parse(p2.getTime());
+				} catch (Exception e) {
+					// I really don't care.
+					e.printStackTrace();
+				}
+				return -1 * date1.compareTo(date2);
+			}
+		});
 
-        // Filter.
-        Set<String> seenNames = new HashSet<String>();
-        for (Ping ping : pings) {
-            Shark shark = mJaws.getShark(ping.getName());
+		// Filter.
+		Set<String> seenNames = new HashSet<String>();
+		for (Ping ping : pings) {
+			Shark shark = mJaws.getShark(ping.getName());
 
-            // Dropdown strings just happen to match, so we get lucky. This is hackish.
-            boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
-            boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
-            boolean locationMatch = query.location == SearchFrame.OPTION_ALL || query.location.equals(shark.getTagLocation());
-            boolean newShark = !seenNames.contains(shark.getName());
+			// Dropdown strings just happen to match, so we get lucky. This is
+			// hackish.
+			boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
+			boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
+			boolean locationMatch = query.location == SearchFrame.OPTION_ALL
+					|| query.location.equals(shark.getTagLocation());
+			boolean newShark = !seenNames.contains(shark.getName());
 
-            if (genderMatch && stageMatch && locationMatch && newShark) {
-                sharks.add(shark);
-                seenNames.add(shark.getName());
+			if (genderMatch && stageMatch && locationMatch && newShark) {
+				sharks.add(shark);
+				seenNames.add(shark.getName());
 
-                mSearchFrame.addResult(shark, ping, mUserPreference.isFavorite(shark.getName()));
-            }
-        }
+				mSearchFrame.addResult(shark, ping, mUserPreference.isFavorite(shark.getName()));
+			}
+		}
+		return sharks;
+	}
 
-        return sharks;
-    }
+	private StatisticsFrame performStatisticsQuery(SearchFrame.Query query) {
+		// Initialize an empty list.
+		List<Shark> sharks = new LinkedList<Shark>();
+		List<Ping> pings = new ArrayList<Ping>();
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        Component component = (Component) e.getSource();
+		// Time query.
+		switch (query.range) {
+		case SearchFrame.RANGE_DAY:
+			pings = mJaws.past24Hours();
+			break;
+		case SearchFrame.RANGE_WEEK:
+			pings = mJaws.pastWeek();
+			break;
+		case SearchFrame.RANGE_MONTH:
+			pings = mJaws.pastMonth();
+			break;
+		default:
+			System.out.println("Unknown time range: " + query.range);
+		}
 
-        JButton jButton;
-        switch (component.getName()) {
-        case SearchFrame.JBSEARCH_NAME:
-            SearchFrame.Query query = mSearchFrame.getQuery();
+		// Sort pings, latest first.
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Collections.sort(pings, new Comparator<Ping>() {
+			@Override
+			public int compare(Ping p1, Ping p2) {
+				Date date1 = null, date2 = null;
+				try {
+					date1 = formatter.parse(p1.getTime());
+					date2 = formatter.parse(p2.getTime());
+				} catch (Exception e) {
+					// I really don't care.
+					e.printStackTrace();
+				}
+				return -1 * date1.compareTo(date2);
+			}
+		});
 
-            // Do not interrupt UI while these queries are happening.
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    mSearchFrame.clearResults();
-                    performQuery(query);
-                }
-            };
+		// Filter.
+		Set<String> seenNames = new HashSet<String>();
+		for (Ping ping : pings) {
+			Shark shark = mJaws.getShark(ping.getName());
 
-            new Thread(r).start();
-            break;
-        case ResultPanel.JBFOLLOW_NAME:
-            jButton = (JButton) component;
-            ResultPanel resultPanel = (ResultPanel) jButton.getParent().getParent();
-            String sharkName = jButton.getActionCommand();
+			// Dropdown strings just happen to match, so we get lucky. This is
+			// hackish.
+			boolean genderMatch = query.gender == SearchFrame.OPTION_ALL || query.gender.equals(shark.getGender());
+			boolean stageMatch = query.stage == SearchFrame.OPTION_ALL || query.stage.equals(shark.getStageOfLife());
+			boolean locationMatch = query.location == SearchFrame.OPTION_ALL
+					|| query.location.equals(shark.getTagLocation());
+			boolean newShark = !seenNames.contains(shark.getName());
 
-            mUserPreference.toggleFavorite(sharkName);
-            resultPanel.toggleFollow();
+			if (genderMatch && stageMatch && locationMatch && newShark) {
+				sharks.add(shark);
+				seenNames.add(shark.getName());
+			}
+		}
+		// mStatisticsFrame.addResult(sharks);
+		int maleCount = 0;
+		int femaleCount = 0;
+		int matureCount = 0;
+		int immatureCount = 0;
+		int undeterminedCount = 0;
+		HashMap<String, Integer> locationMap = new HashMap<String, Integer>();
+		for (Shark s : sharks) {
+			if (s.getGender().equals(SearchFrame.GENDER_MALE)) {
+				maleCount++;
+			} else {
+				femaleCount++;
+			}
 
-            break;
-        case SharkOfTheDayPanel.JBSOTD_NAME:
-            jButton = (JButton) component;
-            if (Desktop.isDesktopSupported()) {
-                try {
-                    String link = jButton.getActionCommand();
-                    if (link != null) {
-                        Desktop.getDesktop().browse(new URI(link));
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                } catch (URISyntaxException ex) {
-                }
-            }
+			if (s.getStageOfLife().equals(SearchFrame.STAGE_MATURE)) {
+				matureCount++;
+			} else if (s.getStageOfLife().equals(SearchFrame.STAGE_IMMATURE)) {
+				immatureCount++;
+			} else {
+				undeterminedCount++;
+			}
 
-            break;
-        default:
-            System.out.println("Unknown action source: " + component.getName());
-        }
-    }
+			String location = s.getTagLocation();
+			if (locationMap.containsKey(location)) {
+				locationMap.replace(location, (locationMap.get(location) + 1));
+			} else {
+				locationMap.put(location, 1);
+			}
+		}
+		return new StatisticsFrame(maleCount, femaleCount, matureCount, immatureCount, undeterminedCount, locationMap);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		Component component = (Component) e.getSource();
+
+		JButton jButton;
+		switch (component.getName()) {
+		case SearchFrame.JBSEARCH_NAME:
+			SearchFrame.Query query = mSearchFrame.getQuery();
+			// Do not interrupt UI while these queries are happening.
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					mSearchFrame.clearResults();
+					performQuery(query);
+				}
+			};
+
+			new Thread(r).start();
+			break;
+		case ResultPanel.JBFOLLOW_NAME:
+			jButton = (JButton) component;
+			ResultPanel resultPanel = (ResultPanel) jButton.getParent().getParent();
+			String sharkName = jButton.getActionCommand();
+
+			mUserPreference.toggleFavorite(sharkName);
+			resultPanel.toggleFollow();
+
+			break;
+		case SharkOfTheDayPanel.JBSOTD_NAME:
+			jButton = (JButton) component;
+			if (Desktop.isDesktopSupported()) {
+				try {
+					String link = jButton.getActionCommand();
+					if (link != null) {
+						Desktop.getDesktop().browse(new URI(link));
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				} catch (URISyntaxException ex) {
+				}
+			}
+
+			break;
+		case SearchFrame.JBSTATISTICS_NAME:
+			SearchFrame.Query query2 = mSearchFrame.getQuery();
+			Runnable r2 = new Runnable() {
+				@Override
+				public void run() {
+					StatisticsFrame jfStatistics = performStatisticsQuery(query2);
+					jfStatistics.setVisible(true);
+				}
+			};
+			new Thread(r2).start();
+			break;
+		default:
+			System.out.println("Unknown action source: " + component.getName());
+		}
+	}
 }
