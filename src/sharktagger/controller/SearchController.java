@@ -298,4 +298,14 @@ public class SearchController implements ActionListener {
             System.out.println("Unknown action source: " + component.getName());
         }
     }
+
+    private static class PingGroup {
+        public Ping ping;
+        public Shark shark;
+
+        public PingGroup(Ping p, Shark s) {
+            ping = p;
+            shark = s;
+        }
+    }
 }
