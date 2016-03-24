@@ -161,7 +161,7 @@ public class SearchFrame extends JFrame {
         jcbStage = new JComboBox<String>(STAGE_OPTIONS);
         jcbLocation = new JComboBox<String>(locations.toArray(locationsArray));
         jbSearch = new JButton(JBSEARCH_TEXT);
-        jbStatistics =new JButton(JBSTATISTICS_TEXT);
+        jbStatistics = new JButton(JBSTATISTICS_TEXT);
 
         // Set names and action listener.
         jbSearch.setName(JBSEARCH_NAME);

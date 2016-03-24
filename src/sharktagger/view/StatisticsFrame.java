@@ -20,13 +20,9 @@ public class StatisticsFrame extends JFrame {
 
     /** String constants. */
     public static final String TITLE = "Statistics";
-
-    /** Pie Chart Title */
     public static final String GENDER_PIECHART_TITLE = "Gender";
     public static final String STAGE_PIECHART_TITLE = "Stage of Life";
     public static final String LOCATION_PIECHART_TITLE = "Tag Location";
-
-    /** Empty Message */
     private static final String STATISTICS_EMPTY_MESSAGE = "No sharks are found with selected option set.";
 
     public static final int WIDTH = 500;
@@ -50,21 +46,6 @@ public class StatisticsFrame extends JFrame {
     private int undeterminedCount;
     HashMap<String, Integer> locationMap;
 
-    public StatisticsFrame(int maleCount, int femaleCount, int matureCount, int immatureCount, int undeterminedCount,
-            HashMap<String, Integer> locationMap) {
-        super(TITLE);
-        this.setSize(WIDTH, HEIGHT);
-
-        this.maleCount = maleCount;
-        this.femaleCount = femaleCount;
-        this.matureCount = matureCount;
-        this.immatureCount = immatureCount;
-        this.undeterminedCount = undeterminedCount;
-        this.locationMap = locationMap;
-
-        setupUI();
-    }
-
     public void setupUI() {
         if (locationMap.size() > 0) {
             this.setLayout(new GridLayout(3, 1));
@@ -81,6 +62,20 @@ public class StatisticsFrame extends JFrame {
             emptyMessage.setHorizontalAlignment(JLabel.CENTER);
             this.add(emptyMessage);
         }
+    }
+
+    public StatisticsFrame(int maleCount, int femaleCount, int matureCount, int immatureCount, int undeterminedCount, HashMap<String, Integer> locationMap) {
+        super(TITLE);
+        this.setSize(WIDTH, HEIGHT);
+
+        this.maleCount = maleCount;
+        this.femaleCount = femaleCount;
+        this.matureCount = matureCount;
+        this.immatureCount = immatureCount;
+        this.undeterminedCount = undeterminedCount;
+        this.locationMap = locationMap;
+
+        setupUI();
     }
 
     private void createDataset() {
@@ -134,5 +129,4 @@ public class StatisticsFrame extends JFrame {
             }
         }
     }
-
 }
