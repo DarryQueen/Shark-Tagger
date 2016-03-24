@@ -1,6 +1,7 @@
 preferences.xml
 jaws_keys.xml
 
+.DS_Store
 .metadata
 bin/
 tmp/

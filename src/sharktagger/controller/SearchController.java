@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Dictionary;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +27,7 @@ import api.jaws.Shark;
 import sharktagger.controller.search.SharkOfTheDay;
 import sharktagger.model.UserPreference;
 import sharktagger.view.SearchFrame;
+import sharktagger.view.StatisticsFrame;
 import sharktagger.view.search.ResultPanel;
 import sharktagger.view.search.SharkOfTheDayPanel;
 
@@ -37,8 +40,9 @@ public class SearchController implements ActionListener {
     /** Jaws object. */
     private Jaws mJaws;
 
-    /** SearchFrame instance representing the view. */
+    /** Frame instances representing the views. */
     private SearchFrame mSearchFrame;
+    private StatisticsFrame mStatisticsFrame;
 
     /** Shark of the day. */
     private Shark mSharkOfTheDay;
@@ -64,6 +68,7 @@ public class SearchController implements ActionListener {
         }
 
         mSearchFrame = new SearchFrame(this, locations, acknowledgement);
+        mStatisticsFrame = new StatisticsFrame();
     }
 
     /**
@@ -88,9 +93,9 @@ public class SearchController implements ActionListener {
         mSearchFrame.setVisible(true);
     }
 
-    private List<Shark> performQuery(SearchFrame.Query query) {
+    private List<PingGroup> performQuery(SearchFrame.Query query, PingGroupFoundListener listener) {
         // Initialize an empty list.
-        List<Shark> sharks = new LinkedList<Shark>();
+        List<PingGroup> pingGroups = new LinkedList<PingGroup>();
         List<Ping> pings = new ArrayList<Ping>();
 
         // Time query.
@@ -137,14 +142,46 @@ public class SearchController implements ActionListener {
             boolean newShark = !seenNames.contains(shark.getName());
 
             if (genderMatch && stageMatch && locationMatch && newShark) {
-                sharks.add(shark);
+                PingGroup pingGroup = new PingGroup(ping, shark);
+
+                pingGroups.add(pingGroup);
                 seenNames.add(shark.getName());
 
-                mSearchFrame.addResult(shark, ping, mUserPreference.isFavorite(shark.getName()));
+                if (listener != null)
+                    listener.pingGroupFound(pingGroup);
             }
         }
 
-        return sharks;
+        return pingGroups;
+    }
+
+    private StatisticsFrame.Statistic getStatistic(List<Shark> sharks) {
+        Dictionary<String, Integer> genderCount = new Hashtable<String, Integer>();
+        Dictionary<String, Integer> stageCount = new Hashtable<String, Integer>();
+        Dictionary<String, Integer> locationCount = new Hashtable<String, Integer>();
+
+        // Initialize some dictionaries.
+        genderCount.put(SearchFrame.GENDER_MALE, 0);
+        genderCount.put(SearchFrame.GENDER_FEMALE, 0);
+
+        stageCount.put(SearchFrame.STAGE_MATURE, 0);
+        stageCount.put(SearchFrame.STAGE_IMMATURE, 0);
+        stageCount.put(SearchFrame.STAGE_UNDETERMINED, 0);
+
+        for (Shark shark : sharks) {
+            genderCount.put(shark.getGender(), genderCount.get(shark.getGender()) + 1);
+
+            stageCount.put(shark.getStageOfLife(), stageCount.get(shark.getStageOfLife()) + 1);
+
+            String location = shark.getTagLocation();
+            if (locationCount.get(location) == null) {
+                locationCount.put(location, 1);
+            } else {
+                locationCount.put(location, locationCount.get(location) + 1);
+            }
+        }
+
+        return new StatisticsFrame.Statistic(genderCount, stageCount, locationCount);
     }
 
     @Override
@@ -152,16 +189,45 @@ public class SearchController implements ActionListener {
         Component component = (Component) e.getSource();
 
         JButton jButton;
+        Runnable r;
+        SearchFrame.Query query;
         switch (component.getName()) {
         case SearchFrame.JBSEARCH_NAME:
-            SearchFrame.Query query = mSearchFrame.getQuery();
+            query = mSearchFrame.getQuery();
 
             // Do not interrupt UI while these queries are happening.
-            Runnable r = new Runnable() {
+            r = new Runnable() {
                 @Override
                 public void run() {
                     mSearchFrame.clearResults();
-                    performQuery(query);
+                    performQuery(query, new PingGroupFoundListener() {
+                        @Override
+                        public void pingGroupFound(PingGroup pingGroup) {
+                            mSearchFrame.addResult(pingGroup.shark, pingGroup.ping, mUserPreference.isFavorite(pingGroup.shark.getName()));
+                        }
+                    });
+                }
+            };
+
+            new Thread(r).start();
+            break;
+        case SearchFrame.JBSTATISTICS_NAME:
+            query = mSearchFrame.getQuery();
+
+            // Do not interrupt UI while these queries are happening.
+            r = new Runnable() {
+                @Override
+                public void run() {
+                    List<Shark> sharks = new LinkedList<Shark>();
+                    performQuery(query, new PingGroupFoundListener() {
+                        @Override
+                        public void pingGroupFound(PingGroup pingGroup) {
+                            sharks.add(pingGroup.shark);
+                        }
+                    });
+
+                    mStatisticsFrame.setStatistic(getStatistic(sharks));
+                    mStatisticsFrame.setVisible(true);
                 }
             };
 
@@ -194,5 +260,22 @@ public class SearchController implements ActionListener {
         default:
             System.out.println("Unknown action source: " + component.getName());
         }
+    }
+
+    private static class PingGroup {
+        public Ping ping;
+        public Shark shark;
+
+        public PingGroup(Ping p, Shark s) {
+            ping = p;
+            shark = s;
+        }
+    }
+
+    /**
+     * Use in order that the queries can update while they are run.
+     */
+    private static interface PingGroupFoundListener {
+        public void pingGroupFound(PingGroup pingGroup);
     }
 }

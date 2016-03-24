@@ -31,6 +31,7 @@ public class SearchFrame extends JFrame {
     /** String constants. */
     public static final String TITLE = "Search";
     public static final String JBSEARCH_TEXT = "Search";
+    public static final String JBSTATISTICS_TEXT = "Statistics";
 
     public static final String DROPDOWN_TITLE = "Shark Tracker";
     public static final String RANGE_DROPDOWN_TITLE = "Tracking Range";
@@ -40,6 +41,7 @@ public class SearchFrame extends JFrame {
 
     /** Internal naming constants. */
     public static final String JBSEARCH_NAME = "sharktagger.view.SearchFrame.jbSearch";
+    public static final String JBSTATISTICS_NAME = "sharktagger.view.SearchFrame.jbStatistics";
 
     /** Dropdown constants. */
     public static final String OPTION_ALL = "All";
@@ -70,6 +72,7 @@ public class SearchFrame extends JFrame {
     private JComboBox<String> jcbStage;
     private JComboBox<String> jcbLocation;
     private JButton jbSearch;
+    private JButton jbStatistics;
 
     private JPanel jpResults;
 
@@ -106,6 +109,7 @@ public class SearchFrame extends JFrame {
         queryPanel.add(jcbLocation);
         queryPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
         queryPanel.add(jbSearch);
+        queryPanel.add(jbStatistics);
 
         optionsPanel.add(queryPanel, BorderLayout.NORTH);
         optionsPanel.setBorder(BorderFactory.createEmptyBorder(18, 18, 18, 18));
@@ -157,10 +161,13 @@ public class SearchFrame extends JFrame {
         jcbStage = new JComboBox<String>(STAGE_OPTIONS);
         jcbLocation = new JComboBox<String>(locations.toArray(locationsArray));
         jbSearch = new JButton(JBSEARCH_TEXT);
+        jbStatistics = new JButton(JBSTATISTICS_TEXT);
 
         // Set names and action listener.
         jbSearch.setName(JBSEARCH_NAME);
         jbSearch.addActionListener(listener);
+        jbStatistics.setName(JBSTATISTICS_NAME);
+        jbStatistics.addActionListener(listener);
 
         jpResults = new JPanel();
 
